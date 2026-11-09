@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Road Buddies: Road Impact Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f5f0;--card:#fff;--tx:#1d2a22;--mu:#667568;--bd:#dcdad0;--ac:#2f7d4f;--bad:#c0392b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141a16;--card:#1e2721;--tx:#e8efe9;--mu:#9aab9d;--bd:#33403a;--ac:#5cc58a;--bad:#ff7a68}}
+:root[data-theme="dark"]{--bg:#141a16;--card:#1e2721;--tx:#e8efe9;--mu:#9aab9d;--bd:#33403a;--ac:#5cc58a;--bad:#ff7a68}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+.hd{position:relative;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;max-width:1800px;margin:auto;padding:20px 16px 6px}
+h1{font-family:Montserrat,system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;font-size:clamp(30px,6vw,52px);font-weight:800;letter-spacing:-.03em;line-height:1.05}h1 em{display:block;font-style:normal;font-size:.5em;font-weight:700;letter-spacing:-.01em;color:var(--ac);margin-top:4px}
+.ft{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.ft span{font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;background:var(--card);border:1px solid var(--bd);color:var(--mu)}
+[hidden]{display:none!important}
+.hbar{display:flex;flex-direction:column;gap:6px;align-items:stretch;min-width:150px}.hbar button{text-align:left}#infp{width:min(640px,calc(100vw - 32px))}#infp .notes{font-size:14px;line-height:1.55;margin-top:6px;border-top:1px solid var(--bd);padding-top:6px}#infp .notes ul{padding-left:20px;margin:6px 0}.hbar button{font-weight:600;white-space:nowrap}
+.pop{position:absolute;right:16px;top:64px;z-index:20;width:min(360px,calc(100vw - 32px));max-height:calc(100vh - 90px);overflow:auto;box-shadow:0 8px 28px rgba(0,0,0,.25)}
+.pop h3{margin:0 0 10px;font-size:15px}.pop .sr{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 10px}.pop .sr:last-child{margin:0}
+.opts{display:flex;flex-wrap:wrap;gap:6px}.sec{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
+#stb{font-size:12px;color:var(--mu);margin-top:6px;cursor:pointer;line-height:1.35}#stb:hover{text-decoration:none}
+#info2{font-size:13px}#info2 h3{margin:0 0 6px;font-size:15px}.ir{display:grid;grid-template-columns:100px 1fr;gap:8px;padding:4px 0;border-top:1px solid var(--bd)}.ir:first-of-type{border-top:0}.ir>span:first-child{color:var(--mu);font-weight:600}#upd b{font-weight:600;color:var(--tx)}
+.wrap{display:grid;grid-template-columns:minmax(0,2.3fr) minmax(300px,1fr);gap:14px;padding:12px 16px 20px;max-width:1800px;margin:auto}
+@media(max-width:820px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px}
+canvas{width:100%;display:block;border-radius:8px;cursor:crosshair;touch-action:manipulation;background:#4a86b8}
+.row{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px;align-items:center}
+button,select{font:inherit;font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx);cursor:pointer}
+button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+button.go{background:var(--ac);color:#fff;border-color:var(--ac);font-weight:600}
+.lbl{font-size:12px;color:var(--mu);margin-right:2px}
+.score{font-size:52px;font-weight:700;line-height:1}.bar{height:8px;background:var(--bd);border-radius:5px;overflow:hidden;margin:6px 0}
+.bar i{display:block;height:100%}.mu{color:var(--mu);font-size:13px}
+.sp{display:grid;grid-template-columns:1fr 70px;gap:8px;align-items:center;font-size:13px;margin:4px 0}
+.leg span{display:inline-flex;align-items:center;gap:4px;font-size:12px;margin-right:8px}.leg b{width:12px;height:12px;border-radius:3px;display:inline-block}
+h3{margin:12px 0 6px;font-size:14px}label{font-size:13px;display:inline-flex;gap:5px;align-items:center}
+canvas{touch-action:none;box-shadow:0 2px 10px rgba(0,0,0,.18);cursor:grab}
+.zb{position:absolute;left:8px;top:8px;display:flex;flex-direction:column;gap:4px}.zb button{width:32px;height:32px;padding:0;font-size:16px;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+#tip{position:absolute;display:none;pointer-events:none;background:rgba(20,26,22,.92);color:#fff;font-size:12px;line-height:1.35;padding:6px 9px;border-radius:8px;white-space:nowrap}
+input[type=text]{font:inherit;font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx)}
+.lk{font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx);text-decoration:none}
+.fs{margin-top:8px;font-size:12px;color:var(--mu);line-height:1.5}.fs summary{cursor:pointer;font-weight:600;color:var(--mu)}.fs a{color:var(--ac);text-decoration:none;white-space:nowrap}.fs a:hover{text-decoration:underline}.fs .t{display:inline-block;font-size:10px;font-weight:700;padding:0 5px;border-radius:99px;border:1px solid var(--bd);margin-left:3px;color:var(--mu);vertical-align:1px}.fs ul{margin:4px 0 0;padding-left:16px}.fsb{margin-top:8px;padding:6px 8px;border:1px solid var(--bd);border-radius:8px;font-size:12px;color:var(--mu)}.fsb a{color:var(--ac);text-decoration:none;white-space:nowrap}.fsb a:hover{text-decoration:underline}.fsb .t{display:inline-block;font-size:10px;font-weight:700;padding:0 5px;border-radius:99px;border:1px solid var(--bd);margin-left:3px}#fsall details{border-top:1px solid var(--bd);padding:4px 0}#fsall summary{cursor:pointer;font-weight:600}
+@media (orientation:landscape) and (max-height:540px){.wrap{grid-template-columns:minmax(0,2fr) minmax(250px,1fr)}}
+</style></head><body>
+<header class="hd"><div><h1>Road Buddies<em>Road Impact Map</em></h1></div>
+<div class="hbar"><button id="setb" aria-expanded="false" title="Units, scroll speed, land setting">⚙ Settings</button><button id="infb" aria-expanded="false" title="Status, data sources, notes and assumptions">ℹ Info</button><button id="mapb" aria-expanded="false" title="Turn map details on or off">🗺 Map options</button></div>
+<div id="setp" class="card pop" hidden><h3>Settings</h3>
+<div class="sr"><span class="lbl">Units</span><button id="un" title="Switch between miles/feet and kilometres/metres">Units: mi · ft</button></div>
+<div class="sr"><span class="lbl">Scroll speed</span><input type="range" id="ps" min=".2" max="1" step=".1" value=".6" title="How far the map moves when you drag it"></div>
+<div class="sr"><span class="lbl">Land setting</span><select id="ls" title="Used only for simulated places"><option value="auto">From place</option><option value="0">Natural</option><option value="0.05">Rural homes</option><option value="0.2">Suburban</option><option value="0.5">City</option></select></div>
+
+</div>
+<div id="mapp" class="card pop" hidden><h3>Map options</h3><div class="mu" style="margin-bottom:8px">Show or hide parts of the map.</div>
+<div class="opts"><button data-o="contours">Contour lines</button><button data-o="grid">Lat/lon grid</button><button data-o="title">Place name</button><button data-o="scale">Scale bar</button><button data-o="peak">Peak marker</button><button data-o="smooth">Smooth habitat edges</button><button data-o="around">Surrounding area</button></div>
+</div>
+<div id="infp" class="card pop" hidden><div id="info2" title="The landscape renews every 2 days at 5:00 PM PST (UTC−8, no daylight-saving shift). Real data is downloaded again on this schedule.">
+  <h3>Info</h3>
+  <div class="ir"><span>Place</span><span id="loc">Search a place to begin.</span></div>
+  <div class="ir"><span>Data</span><span id="rstat" style="font-weight:600">Starting…</span></div>
+  <div class="ir"><span>Last updated</span><span id="updLast"></span></div>
+  <div class="ir"><span>Next update</span><span id="updNext"></span></div>
+ </div>
+ <div id="topoDesc" style="margin-top:10px;padding-top:8px;border-top:1px solid var(--bd);font-size:13px;line-height:1.5"></div>
+ <h3>Data in use</h3><div class="mu" id="srcNote" style="margin-bottom:6px"></div><div id="srcNow" style="font-size:13px"></div>
+ <div class="row" style="margin:10px 0 0"><button id="srcReload">↻ Reload data for this place</button></div>
+ <h3>Sources by feature</h3><div class="mu" style="margin-bottom:6px">Every feature lists at least two sources. Links open your current place where the service supports it.</div><div id="fsall"></div>
+ 
+ <div class="notes" id="notes"></div></div>
+</header>
+<div class="wrap">
+<div class="card">
+ <div class="row"><input type="text" id="q" placeholder="Go anywhere: city, park, country, or lat, lon" style="flex:1;min-width:160px"><button class="go" id="qgo">Go</button><button id="rnd">🎲 Random</button><button id="plb" aria-expanded="false" title="Example places">📍 Places ▾</button></div>
+ <div class="row" id="chips" hidden></div>
+ 
+ <div class="row"><span class="lbl">Layer</span>
+  <button data-l="habitat" class="on">Habitat</button><button data-l="topo">Topography</button><button data-l="sat" title="Real satellite imagery of the area (NASA / USGS)">🛰️ Satellite</button><button data-l="3d" title="Tilt and spin the terrain in 3D">🏔️ 3D terrain</button><button data-l="time" title="Real land cover change over the years">⏱ Timelapse</button>
+  <button id="moreLb" aria-expanded="false" title="More layers">More ▾</button><span id="moreL" class="row" hidden style="margin:0"><button data-l="rich">Species richness</button><button data-l="species">Species range</button><select id="spSel"></select></span></div>
+ <div style="position:relative"><canvas id="cv" width="768" height="504"></canvas><div class="zb"><button id="zi" title="Zoom in">+</button><button id="zo" title="Zoom out">−</button><button id="zr" title="Reset view">⟲</button><button id="rl" title="Rotate left">↺</button><button id="rr" title="Rotate right">↻</button><button id="rn" title="North up">🧭</button></div><div id="tip"></div></div>
+ <div id="stb" title="Click for details"></div>
+ <div class="row" id="tlb" style="display:none;margin-top:8px"><button class="go" id="tpl">▶ Play</button><input type="range" id="tyr" min="0" max="30" step="1" value="0" style="flex:1;min-width:120px"><b id="tyl" style="min-width:56px">Year 0</b></div>
+ <div class="mu" id="tst" style="display:none;margin-top:4px"></div>
+ <div class="leg" id="leg" style="margin-top:8px"></div>
+ <div class="row" style="margin-top:10px"><span class="lbl">Tool</span>
+  <button data-m="inspect" class="on">Inspect</button><button data-m="draw">Draw road</button><button id="undo" disabled title="Undo last action (Ctrl+Z)">↶ Undo</button><span id="moreT" class="row" style="margin:0"><button data-m="cross">Add crossing</button><button data-m="tunnel">Add tunnel</button><button id="clr">Clear road</button><button id="regen" title="Load a random real place">New place</button></span></div>
+ <div class="mu" id="hint"></div>
+ 
+</div>
+<div>
+ <div class="card">
+  <div class="mu" title="Modelled chance the road passes an environmental review, from seven checks: waters and wetlands filled and design grade (official limits, marked ★), plus habitat connectivity, threatened species, wildlife mortality, erosion and footprint (model estimates). Each check adds penalty points, so a higher score means the road is less likely to be approved (0 = no concerns, 100 = certain denial). A screening estimate, not a legal decision.">Impact points (higher = less approval)</div>
+  <div class="score" id="score">0</div><div id="grade" style="font-weight:600"></div>
+  <div class="bar"><i id="sbar" style="width:0"></i></div>
+  <div class="mu" id="cmp"></div>
+  <div id="stats" class="mu" style="margin-top:6px"></div>
+  
+ </div>
+ <div class="sec" id="secbar"><button data-sec="secRoad" class="on" aria-expanded="true">🛣 Road design</button><button data-sec="secSp" aria-expanded="false">🐾 Species impact</button><button data-sec="secChk" aria-expanded="false">📋 Location checklist</button></div>
+ <div class="card" id="secRoad" style="margin-top:8px">
+  <h3 style="margin-top:0">Road design</h3>
+  <div class="row"><span class="lbl">Width</span><select id="wd"><option value="0.7">Narrow</option><option value="1" selected>Standard</option><option value="1.5">Wide</option></select>
+  <span class="lbl">Traffic</span><select id="tr"><option value="0.5">Low</option><option value="0.8" selected>Medium</option><option value="1">High</option></select></div>
+  <h3>Make it better for the environment</h3>
+  <div class="row"><label><input type="checkbox" id="fence"> Wildlife fencing</label><label><input type="checkbox" id="buf"> Noise and vegetation buffer</label></div>
+  <div class="row"><span class="lbl">Cost priority</span><select id="bp"><option value="5">Impact first</option><option value="15" selected>Balanced</option><option value="40">Budget-conscious</option></select></div>
+  <div class="row"><button class="go" id="auto">✨ Auto-improve road</button><button id="reset">Remove improvements</button></div>
+  <div class="mu" id="crn"></div>
+  
+ </div>
+ <div class="card" id="secSp" style="margin-top:8px" hidden><h3 style="margin-top:0">Species impact</h3><div id="sps" class="mu">Draw a road to see species effects.</div></div>
+ <div class="card" id="secChk" style="margin-top:8px" hidden><h3 style="margin-top:0">Location checklist</h3><div id="info" class="mu">Choose Inspect and click the map.</div></div>
+ 
+</div></div>
+
+<div id="notesSrc" hidden><h3>Sources</h3><ul style="padding-left:18px;margin:4px 0">
+<li><b>Land cover:</b> <a href="https://gibs.earthdata.nasa.gov/" target="_blank" rel="noopener">NASA MODIS via GIBS</a> (500 m, yearly; model-classified, so single cells can be wrong), cross-checked against <a href="https://www.mrlc.gov/" target="_blank" rel="noopener">USGS / MRLC NLCD</a>.</li>
+<li><b>Elevation:</b> <a href="https://www.usgs.gov/3d-elevation-program" target="_blank" rel="noopener">USGS 3DEP</a> and <a href="https://lpdaac.usgs.gov/products/srtmgl1v003/" target="_blank" rel="noopener">NASA SRTM</a> via <a href="https://www.opentopodata.org/" target="_blank" rel="noopener">OpenTopoData</a>.</li>
+<li><b>Imagery:</b> NASA GIBS worldwide (coarse), USGS National Map in the US; compare in Google Earth.</li>
+<li><b>Species:</b> <a href="https://www.gbif.org" target="_blank" rel="noopener">GBIF</a> records, <a href="https://www.iucnredlist.org" target="_blank" rel="noopener">IUCN</a> status, <a href="https://www.inaturalist.org/" target="_blank" rel="noopener">iNaturalist</a> and <a href="https://ecos.fws.gov/" target="_blank" rel="noopener">USFWS ECOS</a> for checking. <b>Places:</b> <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> and <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a>.</li>
+<li><b>Costs:</b> <a href="https://www.fdot.gov/fpo/fpc/reports/costpermile" target="_blank" rel="noopener">Florida DOT</a> road costs, a <a href="https://wsdot.wa.gov/" target="_blank" rel="noopener">WSDOT</a> crossing study, and an older <a href="https://arc-solutions.org/" target="_blank" rel="noopener">ARC Solutions</a> fence figure. Other cost lines are assumptions.</li>
+<li><b>Impact points:</b> a screening estimate, not a legal decision. Only wetland fill (<a href="https://www.epa.gov/cwa-404" target="_blank" rel="noopener">Clean Water Act 404 / Nationwide Permit 14</a>) and road grade (<a href="https://www.transportation.org/" target="_blank" rel="noopener">AASHTO</a>) use official limits (★); the rest are model estimates.</li></ul>
+<p>Compare with: <span id="geoLinks"></span></p>
+<p class="mu" style="margin:0">Not for real road-planning decisions. Links were written from known site addresses and not tested offline.</p></div>
+<script>
+const OPT={contours:1,grid:1,title:1,scale:1,peak:1,smooth:1,around:1};try{Object.assign(OPT,JSON.parse(localStorage.getItem('gt_opt')||'{}'))}catch(e){}
+const W=64,H=42,CS=12,CR=2.4,N=W*H;
+const T=[{n:'Open water',c:'#4a86b8'},{n:'Wetland',c:'#5fa8a0'},{n:'Forest',c:'#2f7d4f'},{n:'Grassland',c:'#b9c26a'},{n:'Scrub',c:'#c9a46a'},{n:'City / homes',c:'#b3a49b'}];
+let climate=null,rf=1,tn=[],sd=[],ri=null,tStart=null,autoUrban=0,cpath=null,rivers=[],geo=null,mtitle='',peakI=null;
+const inT=k=>tn.some(t=>sd[k]>=t.s&&sd[k]<=t.e);
+const SP=[
+{n:'Black bear',sc:'Ursus americanus',st:'LC',hab:[2,4],sens:.9,w:1},
+{n:'Mountain lion',sc:'Puma concolor',st:'NT',hab:[2,4],sens:.9,w:1.3},
+{n:'Mule deer',sc:'Odocoileus hemionus',st:'LC',hab:[2,3],sens:.6,w:1},
+{n:'Red fox',sc:'Vulpes vulpes',st:'LC',hab:[2,3,4],sens:.4,w:1},
+{n:'Tiger salamander',sc:'Ambystoma tigrinum',st:'VU',hab:[1,2],sens:.5,w:1.7},
+{n:'Western pond turtle',sc:'Emys marmorata',st:'EN',hab:[1],sens:.5,w:2.2},
+{n:'Bobcat',sc:'Lynx rufus',st:'NT',hab:[2,4],sens:.7,w:1.3},
+{n:'Burrowing owl',sc:'Athene cunicularia',st:'VU',hab:[3,4],sens:.3,w:1.7}];
+const $=id=>document.getElementById(id),cv=$('cv'),ctx=cv.getContext('2d'),G=ctx,wc=Object.assign(document.createElement('canvas'),{width:768,height:504}),wx=wc.getContext('2d'),sm=Object.assign(document.createElement('canvas'),{width:W,height:H}),sx=sm.getContext('2d');
+let type,rich,elev,seedN=7,pts=[],cr=[],mode='inspect',layer='habitat',rd=null,samples=[],sel=0;
+function mb(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function nf(seed,sc){const r=mb(seed),gw=Math.ceil(W/sc)+2,g=[];for(let i=0;i<gw*(Math.ceil(H/sc)+2);i++)g.push(r());
+ return(x,y)=>{const fx=x/sc,fy=y/sc,ix=Math.floor(fx),iy=Math.floor(fy);let tx=fx-ix,ty=fy-iy;tx=tx*tx*(3-2*tx);ty=ty*ty*(3-2*ty);
+ const a=g[iy*gw+ix],b=g[iy*gw+ix+1],c=g[(iy+1)*gw+ix],d=g[(iy+1)*gw+ix+1];return a+(b-a)*tx+(c-a)*ty+(a-b-c+d)*tx*ty}}
+function fbm(s){const a=nf(s,16),b=nf(s+1,8),c=nf(s+2,4);return(x,y)=>a(x,y)*.6+b(x,y)*.3+c(x,y)*.1}
+function gen(){hist=[];syncU();resetViews();const e=fbm(seedN*11),m=fbm(seedN*13+5);type=new Uint8Array(N);elev=new Float32Array(N);const MV=new Float32Array(N);
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){const ev=e(x,y),mv=m(x,y);elev[y*W+x]=ev;MV[y*W+x]=mv;type[y*W+x]=ev<.38?0:(mv>.6&&ev<.5)?1:mv>.48?2:mv>.3?3:4}
+ if(climate)rankTypes(MV);
+ SP.forEach((s,k)=>{const f=fbm(seedN*31+k*7);s.m=new Uint8Array(N);for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(s.hab.includes(type[i])&&f(x,y)>.36)s.m[i]=1}
+  s.mesh0=lab(s.m).sizes.reduce((a,b)=>a+b*b,0)});
+ rich=new Uint8Array(N);SP.forEach(s=>{for(let i=0;i<N;i++)rich[i]+=s.m[i]});cpath=null;peakI=null;makeRivers();pts=[];cr=[];tn=[];build()}
+function lab(A){const L=new Int32Array(N).fill(-1),sizes=[];for(let i=0;i<N;i++){if(!A[i]||L[i]>=0)continue;const id=sizes.length;let n=0;const st=[i];L[i]=id;
+ while(st.length){const j=st.pop();n++;const x=j%W,y=(j/W)|0;if(x>0&&A[j-1]&&L[j-1]<0){L[j-1]=id;st.push(j-1)}if(x<W-1&&A[j+1]&&L[j+1]<0){L[j+1]=id;st.push(j+1)}
+ if(y>0&&A[j-W]&&L[j-W]<0){L[j-W]=id;st.push(j-W)}if(y<H-1&&A[j+W]&&L[j+W]<0){L[j+W]=id;st.push(j+W)}}sizes.push(n)}return{L,sizes}}
+let units='imperial';const fmtD=(km,d=1)=>units==='metric'?km.toFixed(d)+' km':(km*.621).toFixed(d)+' mi',fmtE=m=>units==='metric'?m+' m':Math.round(m*3.281).toLocaleString()+' ft',fmtA=k=>units==='metric'?Math.round(k)+' km²':Math.round(k*.386)+' mi²';
+function landform(i){if(!type[i])return 'Open water';const e=elevM(i),g=gr(i);return e<80&&g<4?'Flatland':e<80?'Lowland':(g>=18||e>=1200)?'Mountain':(g>=8||e>=500)?'Hill':g>=4?'Rolling hills':e>=400?'Plateau':'Plain'}
+const landfmt=i=>type[i]?landform(i)+' · ':'';
+const desc=i=>layer==='topo'?landform(i):T[type[i]].n;
+const elevM=i=>Math.round(Math.max(0,elev[i]-.38)*2500*rf);
+function gr(i){const x=i%W,y=(i/W)|0,dx=elev[y*W+Math.min(W-1,x+1)]-elev[y*W+Math.max(0,x-1)],dy=elev[Math.min(H-1,y+1)*W+x]-elev[Math.max(0,y-1)*W+x];return Math.hypot(dx,dy)*125*rf}
+const sc=p=>Math.min(W-1,Math.max(0,Math.floor(p.x)))+Math.min(H-1,Math.max(0,Math.floor(p.y)))*W;
+function erosion(buf){if(!samples.length)return 0;const m=samples.reduce((a,p,k)=>inT(k)?a:a+gr(sc(p)),0)/samples.length;return Math.min(1,m/10)*(buf?.5:1)*(rw()>1?1.2:1)}
+function maxGrade(){return Math.round(Math.max(0,...samples.map((p,k)=>inT(k)?0:gr(sc(p)))))}
+function profile(){const v=samples.map(p=>elevM(sc(p))),mn=Math.min(...v),mx=Math.max(...v),n=v.length;return `<svg viewBox="0 0 300 54" style="width:100%;margin-top:8px"><polyline fill="none" stroke="var(--ac)" stroke-width="2" points="${v.map((e,i)=>(i/(n-1)*300).toFixed(1)+','+(50-(e-mn)/((mx-mn)||1)*46).toFixed(1)).join(' ')}"/></svg><div style="font-size:11px">Elevation along road: ${fmtE(mn)}–${fmtE(mx)}</div>`}
+function topoCol(i,x,y){if(!type[i])return '#4a86b8';const t=Math.min(1,Math.max(0,Math.floor(elevM(i)/100)/10)),dx=elev[y*W+Math.min(W-1,x+1)]-elev[y*W+Math.max(0,x-1)],dy=elev[Math.min(H-1,y+1)*W+x]-elev[Math.max(0,y-1)*W+x],l=Math.max(-.5,Math.min(.5,(dx+dy)*8));return `hsl(${110-t*85},45%,${Math.round(62-t*28+l*30)}%)`}
+function build(){samples=[];for(let k=1;k<pts.length;k++){const a=pts[k-1],b=pts[k],n=Math.max(1,Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/.5));
+ for(let s=0;s<=n;s++)samples.push({x:a.x+(b.x-a.x)*s/n,y:a.y+(b.y-a.y)*s/n})}
+ if(samples.length<2){rd=null;return}rd=new Float32Array(N);ri=new Int32Array(N);
+ for(let i=0;i<N;i++){const cx=i%W+.5,cy=((i/W)|0)+.5;let m=99,mi=0;samples.forEach((p,k)=>{const d=(cx-p.x)**2+(cy-p.y)**2;if(d<m){m=d;mi=k}});rd[i]=Math.sqrt(m);ri[i]=mi}sd=[0];for(let k=1;k<samples.length;k++)sd.push(sd[k-1]+Math.hypot(samples[k].x-samples[k-1].x,samples[k].y-samples[k-1].y))}
+const rw=()=>+$('wd').value,dl=b=>(b?1.6:3.2)+(rw()>1?.6:0);
+function near(){const o=new Uint8Array(N);if(!rd)return o;for(let i=0;i<N;i++){const cx=i%W+.5,cy=((i/W)|0)+.5;for(const c of cr)if(Math.hypot(cx-c.x,cy-c.y)<=CR){o[i]=1;break}if(!o[i]&&tn.length&&ri&&inT(ri[i]))o[i]=1}return o}
+function allowed(s,nc,buf){const A=new Uint8Array(N),d=dl(buf),r=rw();for(let i=0;i<N;i++)if(s.m[i]){if(rd&&!nc[i]){if(rd[i]<=r)continue;if(s.sens>=.5&&rd[i]<=d)continue}A[i]=1}return A}
+function evalR(c,fence,buf){if(!rd)return{score:0,approval:null,crit:[],per:[],conn:0,mort:0,lost:0,ero:0};const saved=cr;cr=c;const nc=near();cr=saved;let num=0,den=0,per=[];
+ for(const s of SP){if(!s.mesh0){per.push(0);continue}const m=lab(allowed(s,nc,buf)).sizes.reduce((a,b)=>a+b*b,0);let f=Math.max(0,1-m/s.mesh0)*(.4+.6*s.sens);per.push(f);num+=f*s.w;den+=s.w}
+ const conn=num/den;let rs=0;samples.forEach((p,k)=>{if(!inT(k))rs+=rich[Math.min(N-1,Math.floor(p.y)*W+Math.floor(p.x))]});
+ const mort=Math.min(1,rs/samples.length/6)*(+$('tr').value)*(fence?.35:1)*Math.max(.45,1-.1*c.length);
+ const ero=erosion(buf);let lost=0;const d=dl(buf),r=rw();for(let i=0;i<N;i++){if(!nc[i]&&rich[i]&&(rd[i]<=r||rd[i]<=d*.8))lost++}
+ const R=approval(conn,per,mort,ero,lost);return{score:100-R.approval,approval:R.approval,crit:R.crit,capped:R.capped,per,conn,mort,lost,ero}}
+/* Permit-review screening. Checks marked official use published limits (USACE Nationwide Permit 14, AASHTO Green Book);
+   the others have no published numeric limit, so they are model estimates. The weights are this page's own: real permit decisions are not scored. */
+function wetAcres(){let m=0;for(let k=1;k<samples.length;k++){if(inT(k))continue;const ds=Math.hypot(samples[k].x-samples[k-1].x,samples[k].y-samples[k-1].y);if(type[sc(samples[k])]===1)m+=ds*1000*12*rw()}return m/4046.86}
+function approval(conn,per,mort,ero,lost){const cp=v=>Math.max(0,Math.min(1,v)),g=maxGrade(),ac=wetAcres();
+ let thMax=0;SP.forEach((s,k)=>{if((s.st==='VU'||s.st==='EN')&&s.mesh0)thMax=Math.max(thMax,per[k]||0)});
+ const fp=lost/N,ln=(v,a,b,x,y)=>v<=a?x:v>=b?y:x+(y-x)*(v-a)/(b-a),
+ wsub=ac<=.1?1:ac<=.5?ln(ac,.1,.5,1,.5):ln(ac,.5,5,.5,0),gsub=g<=6?1:g<=10?ln(g,6,10,1,.5):ln(g,10,16,.5,0),
+ C=[
+ {k:'Waters and wetlands filled',w:20,off:1,sub:wsub,ok:ac<=.5,v:ac.toFixed(2)+' acres (Nationwide Permit 14: 0.5 acre limit, notice above 0.1)',fix:'bridge or tunnel the wetland, or move the road off it'},
+ {k:'Design grade',w:10,off:1,sub:gsub,ok:g<=10,v:g+'% steepest (AASHTO Green Book: 10%)',fix:'reroute around steep ground or use a tunnel'},
+ {k:'Habitat connectivity',w:25,sub:cp(1-conn/.35),ok:conn<=.18,v:Math.round(conn*100)+'% lost (model limit 18%)',fix:'add crossings or tunnels where habitat is cut'},
+ {k:'Threatened species',w:20,sub:cp(1-thMax/.3),ok:thMax<=.15,v:'worst impact '+Math.round(thMax*100)+'% (model limit 15%)',fix:'protect wetland, grass and forest patches used by threatened species'},
+ {k:'Wildlife mortality',w:10,sub:cp(1-mort/.6),ok:mort<=.3,v:Math.round(mort*100)+'% roadkill risk (model limit 30%)',fix:'add wildlife fencing and crossings'},
+ {k:'Erosion and water quality',w:8,sub:cp(1-ero/.7),ok:ero<=.35,v:Math.round(ero*100)+'% erosion risk (model limit 35%)',fix:'turn on the buffer or reroute off steep slopes'},
+ {k:'Habitat footprint',w:7,sub:cp(1-(fp-.04)/.16),ok:fp<=.08,v:(fp*100).toFixed(1)+'% of area cleared or degraded (model limit 8%)',fix:'choose a narrower or shorter route'}];
+ let a=C.reduce((t,c)=>t+c.w*c.sub,0),capped='';
+ if(thMax>=.3){a=Math.min(a,35);capped='Fatal flaw: severe harm to a threatened species'}else if(conn>.5){a=Math.min(a,35);capped='Fatal flaw: more than half of habitat connectivity lost'}
+ return{approval:a,crit:C,capped}}
+const acol=p=>p<=30?['Likely approved','#3aa86a']:p<=50?['Approvable with conditions','#d9a21b']:p<=70?['Likely denied as designed','#e0742a']:['Denied','#c0392b'];
+const gcol=s=>s<20?['Low impact','#3aa86a']:s<45?['Moderate impact','#d9a21b']:s<70?['High impact','#e0742a']:['Severe impact','#c0392b'];
+function permitHTML(e){return (e.capped?`<div style="color:var(--bad);font-weight:600;margin-bottom:4px">${e.capped}</div>`:'')+e.crit.map(c=>`<div style="display:flex;gap:6px;margin:2px 0"><b style="color:${c.ok?'#3aa86a':'var(--bad)'}">${c.ok?'✓':'✗'}</b><span><b>${c.k}</b>${c.off?' <span title="Uses a published official limit" style="color:var(--ac);font-weight:700">★ official</span>':' <span class="mu" title="No published numeric limit exists, so this is a model estimate">model</span>'} <span class="mu">${c.v} · </span><b>+${(c.w*(1-c.sub)).toFixed(0)} pts</b>${c.ok?'':`<br><span class="mu">Fix: ${c.fix}</span>`}</span></div>`).join('')}
+function update(){const f=$('fence').checked,b=$('buf').checked,e=evalR(cr,f,b),base=evalR([],false,false);
+ const[g,c]=rd?acol(e.score):['','#888'];$('score').innerHTML=rd?Math.round(e.score)+'<span style="font-size:18px;font-weight:600"> pts</span>':'–';$('grade').textContent=rd?g:'Draw a road to score it';$('grade').style.color=c;$('sbar').style.width=(rd?e.score:0)+'%';$('sbar').style.background=c;
+ $('cmp').textContent=rd&&(cr.length||f||b)?`Unmitigated: ${Math.round(base.score)} pts → now ${Math.round(e.score)} pts (${Math.round(base.score-e.score)} points removed)`:rd?'Try the improvements below to lower it.':'';
+ $('stats').innerHTML=rd?permitHTML(e)+`<div style="margin-top:8px">Habitat connectivity lost: <b>${Math.round(e.conn*100)}%</b><br>Habitat lost or degraded: <b>${fmtA(e.lost)}</b><br>Roadkill risk: <b>${Math.round(e.mort*100)}%</b><br>Road length: <b>${fmtD(samples.length/2)}</b><br>Steepest grade: <b>${maxGrade()}%</b> · Erosion risk: <b>${Math.round(e.ero*100)}%</b>${costHTML()}${profile()}</div>`:'';
+ $('crn').textContent=cr.length+' wildlife crossing'+(cr.length==1?'':'s')+' placed · '+tn.length+' tunnel'+(tn.length==1?'':'s')+(tn.length?' ('+fmtD(tn.reduce((a,t)=>a+t.e-t.s,0))+')':'');
+ $('sps').innerHTML=rd?SP.map((s,k)=>`<div class="sp"><span>${s.n} <span class="mu">${s.st}</span></span><div class="bar" style="margin:0"><i style="width:${Math.min(100,e.per[k]*160)}%;background:var(--bad)"></i></div></div>`).join(''):'Draw a road to see species effects.';
+ draw()}
+/* Smooth up-scaling of a coarse colour grid. Layers made of a few flat colours (habitat etc.) are re-drawn at f times the resolution by letting each hi-res pixel vote among nearby cells with Gaussian weights, which turns 12 px stair-steps into rounded edges. Layers with many colours fall back to plain smooth interpolation. */
+let smHiC=null;
+function smoothUp(src,f,reuse){try{const w=src.width,h=src.height,d=src.getContext('2d',{willReadFrequently:true}).getImageData(0,0,w,h).data,ow=w*f,oh=h*f;
+ const oc=reuse&&smHiC&&smHiC.width===ow&&smHiC.height===oh?smHiC:Object.assign(document.createElement('canvas'),{width:ow,height:oh});if(reuse)smHiC=oc;
+ const ox=oc.getContext('2d'),im=ox.createImageData(ow,oh),o=im.data,pal=new Map(),lab=new Int16Array(w*h),cols=[];let cat=true;
+ for(let i=0;i<w*h;i++){const key=(d[i*4]<<24)|(d[i*4+1]<<16)|(d[i*4+2]<<8)|d[i*4+3];let id=pal.get(key);if(id===undefined){id=cols.length;if(id>=24){cat=false;break}pal.set(key,id);cols.push([d[i*4],d[i*4+1],d[i*4+2],d[i*4+3]])}lab[i]=id}
+ if(cat&&cols.length>1){const K=cols.length,sc=new Float32Array(K),inv=1/(2*.6*.6),ph=[];
+  /* weights depend only on the sub-pixel position, so precompute them once (separable Gaussian over a 4x4 block of cells) */
+  for(let q=0;q<f;q++){const fl=(q+.5)/f-.5,r=Math.round(fl),ws=[];for(let k=-1;k<=2;k++){const dd=r+k-fl;ws.push(Math.exp(-dd*dd*inv))}ph.push({r,ws})}
+  for(let Y=0;Y<oh;Y++){const by=(Y/f)|0,pY=ph[Y-by*f];
+   for(let X=0;X<ow;X++){const bx=(X/f)|0,pX=ph[X-bx*f];sc.fill(0);
+    for(let m=0;m<4;m++){let yy=by+pY.r-1+m;yy=yy<0?0:yy>=h?h-1:yy;const wy=pY.ws[m],row=yy*w;for(let k=0;k<4;k++){let xx=bx+pX.r-1+k;xx=xx<0?0:xx>=w?w-1:xx;sc[lab[row+xx]]+=wy*pX.ws[k]}}
+    let best=0,bv=-1;for(let k=0;k<K;k++)if(sc[k]>bv){bv=sc[k];best=k}
+    const c=cols[best],i=(Y*ow+X)*4;o[i]=c[0];o[i+1]=c[1];o[i+2]=c[2];o[i+3]=c[3]}}}
+ else{for(let Y=0;Y<oh;Y++){const fy=(Y+.5)/f-.5,y0=Math.floor(fy),ty=fy-y0,ya=Math.max(0,Math.min(h-1,y0))*w,yb=Math.max(0,Math.min(h-1,y0+1))*w;
+   for(let X=0;X<ow;X++){const fx=(X+.5)/f-.5,x0=Math.floor(fx),tx=fx-x0,xa=Math.max(0,Math.min(w-1,x0)),xb=Math.max(0,Math.min(w-1,x0+1)),a=(ya+xa)*4,b=(ya+xb)*4,c=(yb+xa)*4,e=(yb+xb)*4,i=(Y*ow+X)*4;
+    for(let q=0;q<4;q++)o[i+q]=(d[a+q]*(1-tx)+d[b+q]*tx)*(1-ty)+(d[c+q]*(1-tx)+d[e+q]*tx)*ty}}}
+ ox.putImageData(im,0,0);return oc}catch(e){return src}}
+function drawTiled(src){const Wp=W*CS,Hp=H*CS,R=z<1?3:1;
+ if(realOK&&OPT.around){G.fillStyle='#27343a';G.fillRect(-R*Wp,-R*Hp,(2*R+1)*Wp,(2*R+1)*Hp);
+  if(layer==='topo'&&!topoOn&&geo&&z<1){topoOn=true;loadST(bboxOf(geo.lat,geo.lon),realTok)}
+  if(z<1&&!nbrOn&&geo){nbrOn=true;loadNeighbors(bboxOf(geo.lat,geo.lon),realTok)}
+  if(layer==='time'){if(surrTime)G.drawImage(surrTime,-2*Wp,-2*Hp,5*Wp,5*Hp);for(const k in nbrT){const[i,j]=k.split(',').map(Number);revDraw(nbrT[k],k,i*Wp,j*Hp,Wp,Hp)}G.drawImage(src,0,0,Wp,Hp);return}
+  if(surr&&layer==='sat')G.drawImage(surr,-2*Wp,-2*Hp,5*Wp,5*Hp);
+  if(layer==='topo'&&surrTopo){G.drawImage(surrTopo,-2*Wp,-2*Hp,5*Wp,5*Hp);G.drawImage(src,0,0,Wp,Hp);return}
+  if(layer!=='sat'&&layer!=='time'&&surrHab)G.drawImage(surrHab,-2*Wp,-2*Hp,5*Wp,5*Hp);
+  if(layer!=='sat'&&layer!=='time')for(const k in nbr){const[i,j]=k.split(',').map(Number);revDraw(nbr[k],k,i*Wp,j*Hp,Wp,Hp)}
+  G.drawImage(src,0,0,Wp,Hp);return}
+ G.drawImage(src,0,0,Wp,Hp)}
+function draw(){layerUI();if(layer==='3d'){draw3d();return}const sq=layer==='sat'||layer==='time',pre=layer==='time'&&!realOK&&tyear<2;let ctx=wx;const nc=near(),b=$('buf').checked;let L=null;
+ if(layer==='species'){const s=SP[sel];L=lab(allowed(s,nc,b)).L}
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;let col=T[type[i]].c;
+  if(layer==='topo')col=topoCol(i,x,y);
+  if(layer==='rich'){col=type[i]===0?'#4a86b8':`hsl(${55+rich[i]*10},65%,${88-rich[i]*8}%)`}
+  ctx.fillStyle=col;ctx.fillRect(x*CS,y*CS,CS,CS);
+  
+  if(layer==='species'){const s=SP[sel];if(type[i]!==0){ctx.fillStyle=s.m[i]?(L[i]>=0?`hsl(${(L[i]*83+20)%360},70%,45%)`:'rgba(0,0,0,.55)'):'rgba(255,255,255,.7)';ctx.fillRect(x*CS,y*CS,CS,CS)}}
+  if(rd&&rd[i]<=dl(b)&&!nc[i]){ctx.fillStyle='rgba(200,50,30,.18)';ctx.fillRect(x*CS,y*CS,CS,CS)}}
+ sx.drawImage(wc,0,0,W,H);const smHi=OPT.smooth?smoothUp(sm,6,true):sm;G.setTransform(1,0,0,1,0,0);G.fillStyle='#27343a';G.fillRect(0,0,768,504);G.setTransform(z*Math.cos(rot),z*Math.sin(rot),-z*Math.sin(rot),z*Math.cos(rot),ox,oy);G.imageSmoothingEnabled=true;G.imageSmoothingQuality='high';drawTiled(layer==='sat'?satCanvas():layer==='time'?timeSrc():(layer==='topo'&&topoComp)?topoComp:smHi);if(layer==='topo'&&topoComp&&rd){G.fillStyle='rgba(200,50,30,.18)';for(let i=0;i<N;i++)if(rd[i]<=dl(b)&&!nc[i])G.fillRect((i%W)*CS,((i/W)|0)*CS,CS,CS)}ctx=G;
+ if(cpath===null)buildContours();
+ ctx.lineJoin='round';ctx.strokeStyle=layer==='topo'?'rgba(70,45,20,.5)':'rgba(255,255,255,.2)';ctx.lineWidth=.8/z;sq||(realOK&&z<1)||!OPT.contours||ctx.stroke(cpath[0]);ctx.strokeStyle=layer==='topo'?'rgba(70,45,20,.85)':'rgba(255,255,255,.4)';ctx.lineWidth=1.5/z;sq||(realOK&&z<1)||!OPT.contours||ctx.stroke(cpath[1]);
+ ctx.strokeStyle='#5ab0e6';ctx.lineCap='round';rivers.forEach(p=>{ctx.beginPath();p.forEach((i,k)=>{const x=((i%W)+.5)*CS,y=(((i/W)|0)+.5)*CS;if(!k)ctx.moveTo(x,y);else{const q=p[k-1],qx=((q%W)+.5)*CS,qy=(((q/W)|0)+.5)*CS;ctx.quadraticCurveTo(qx,qy,(qx+x)/2,(qy+y)/2)}});ctx.lineWidth=(1.2+Math.min(2.5,p.length/40))*1.4/z;ctx.stroke()});
+ let gg=null;if(geo&&OPT.grid){const E=realOK&&z<1?2:0,c2=Math.cos(geo.lat*Math.PI/180),sp=Math.min(64/(111.32*c2),42/110.57)/Math.min(1,Math.max(.25,z)),st=[1,.5,.25,.1,.05,.02,.01,.005].find(s=>sp/s>=3.5)||.005,lo0=geo.lon-(32+64*E)/(111.32*c2),lo1=geo.lon+(32+64*E)/(111.32*c2),la0=geo.lat-(21+42*E)/110.57,la1=geo.lat+(21+42*E)/110.57;
+  ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=1/z;ctx.setLineDash([4/z,6/z]);ctx.beginPath();
+  for(let k=Math.ceil(lo0/st);k*st<=lo1;k++){const x=((k*st-geo.lon)*111.32*c2+32)*CS;ctx.moveTo(x,-E*H*CS);ctx.lineTo(x,(E+1)*H*CS)}
+  for(let k=Math.ceil(la0/st);k*st<=la1;k++){const y=(21-(k*st-geo.lat)*110.57)*CS;ctx.moveTo(-E*W*CS,y);ctx.lineTo((E+1)*W*CS,y)}
+  ctx.stroke();ctx.setLineDash([]);gg={c2,st,lo0,lo1,la0,la1}}
+ if(pts.length&&!pre){ctx.lineCap=ctx.lineJoin='round';ctx.beginPath();pts.forEach((p,k)=>k?ctx.lineTo(p.x*CS,p.y*CS):ctx.moveTo(p.x*CS,p.y*CS));
+  ctx.strokeStyle='#2b2b2b';ctx.lineWidth=rw()*2*CS*.8;ctx.stroke();ctx.setLineDash([8,8]);ctx.strokeStyle='#f2d04a';ctx.lineWidth=1.5;ctx.stroke();ctx.setLineDash([]);
+  pts.forEach(p=>{ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(p.x*CS,p.y*CS,3.5,0,7);ctx.fill()})}
+ (pre?[]:tn).forEach(t=>{const seg=samples.filter((p,k)=>sd[k]>=t.s&&sd[k]<=t.e);if(seg.length<2)return;ctx.lineCap='round';ctx.beginPath();seg.forEach((p,k)=>k?ctx.lineTo(p.x*CS,p.y*CS):ctx.moveTo(p.x*CS,p.y*CS));ctx.strokeStyle='rgba(150,110,60,.9)';ctx.lineWidth=rw()*2*CS*.8+4;ctx.stroke();ctx.setLineDash([3,7]);ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.setLineDash([]);
+  [seg[0],seg[seg.length-1]].forEach(p=>{ctx.beginPath();ctx.arc(p.x*CS,p.y*CS,9,0,7);ctx.fillStyle='#7a5a32';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#fff';ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold 11px system-ui';ctx.textAlign='center';ctx.fillText('T',p.x*CS,p.y*CS+4)})});
+ if(tStart!==null){const k=sd.findIndex(v=>v>=tStart),p=samples[k];if(p){ctx.beginPath();ctx.arc(p.x*CS,p.y*CS,10,0,7);ctx.strokeStyle='#ffd54a';ctx.lineWidth=3;ctx.stroke()}}
+ (pre?[]:cr).forEach(c=>{ctx.beginPath();ctx.arc(c.x*CS,c.y*CS,CR*CS*.6,0,7);ctx.fillStyle='rgba(60,200,110,.85)';ctx.fill();ctx.lineWidth=2.5;ctx.strokeStyle='#fff';ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold 14px system-ui';ctx.textAlign='center';ctx.fillText('🌿',c.x*CS,c.y*CS+5)});
+ if(mode==='draw'&&hov&&pts.length){const p=pts[pts.length-1];ctx.setLineDash([6,6]);ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=2/z;ctx.beginPath();ctx.moveTo(p.x*CS,p.y*CS);ctx.lineTo(hov.x*CS,hov.y*CS);ctx.stroke();ctx.setLineDash([])}
+ if(selC&&mode==='inspect'){ctx.strokeStyle='#ffd54a';ctx.lineWidth=3/z;ctx.strokeRect(selC.x*CS-2,selC.y*CS-2,CS+4,CS+4)}
+ if(hov&&hov.x>=0&&hov.y>=0&&hov.x<W&&hov.y<H&&!(drag&&drag.moved)){ctx.strokeStyle='#fff';ctx.lineWidth=2/z;ctx.strokeRect(Math.floor(hov.x)*CS,Math.floor(hov.y)*CS,CS,CS)}
+ G.setTransform(1,0,0,1,0,0);
+ if(gg&&Math.abs(rot)<.01){G.font='11px system-ui,sans-serif';G.lineWidth=3;G.strokeStyle='rgba(0,0,0,.65)';G.fillStyle='#fff';const dg=gg.st>=1?0:(gg.st===.5||gg.st===.1)?1:(gg.st===.25||gg.st===.05||gg.st===.02)?2:3;
+  G.textAlign='center';for(let k=Math.ceil(gg.lo0/gg.st);k*gg.st<=gg.lo1;k++){const lo=k*gg.st,sx=((lo-geo.lon)*111.32*gg.c2+32)*CS*z+ox;if(sx>50&&sx<700){const t=Math.abs(lo).toFixed(dg)+'°'+(lo>=0?'E':'W');G.strokeText(t,sx,14);G.fillText(t,sx,14)}}
+  G.textAlign='right';for(let k=Math.ceil(gg.la0/gg.st);k*gg.st<=gg.la1;k++){const la=k*gg.st,sy=(21-(la-geo.lat)*110.57)*CS*z+oy;if(sy>100&&sy<470){const t=Math.abs(la).toFixed(dg)+'°'+(la>=0?'N':'S');G.strokeText(t,762,sy+4);G.fillText(t,762,sy+4)}}}
+ if((OPT.title&&mtitle)||realFailed){const tt=realFailed?'Simulated - Connect browser to internet':mtitle;G.font='600 13px system-ui,sans-serif';G.textAlign='center';G.lineJoin='round';G.lineWidth=4;G.strokeStyle='rgba(0,0,0,.7)';G.strokeText(tt,384,41);G.fillStyle=realFailed?'#ff5a48':'#fff';G.fillText(tt,384,41)}
+ if(realOK){G.font='600 10px system-ui,sans-serif';G.textAlign='left';const sh=(t,m)=>{for(const k in m)if(t.indexOf(k)>=0)return m[k];return t},at='Land cover: '+sh(srcUsed.lc||'estimated',{'NASA':'NASA MODIS','Impact':'Impact Obs./Esri'})+' · Elevation: '+sh(DSN[elevDS]||'',{'USGS':'USGS NED','SRTM':'NASA SRTM','ASTER':'NASA ASTER','Terrarium':'Terrarium','Copernicus':'Copernicus','Mapzen':'Mapzen','ESTIMATED':'estimated'})+' · Imagery: '+sh(srcUsed.img||'none',{'USGS':'USGS','NASA':'NASA','Esri':'Esri'});const aw=G.measureText(at).width+12;G.fillStyle='rgba(255,255,255,.78)';G.fillRect(4,484,aw,16);G.fillStyle='#222';G.fillText(at,10,495)}
+ G.fillStyle='rgba(255,255,255,.88)';G.beginPath();G.arc(736,72,19,0,7);G.fill();G.save();G.translate(736,72);G.rotate(rot);G.fillStyle='#222';G.font='bold 10px system-ui';G.textAlign='center';G.fillText('N',0,-9);G.beginPath();G.moveTo(0,-5);G.lineTo(7,15);G.lineTo(0,10);G.lineTo(-7,15);G.closePath();G.fill();G.restore();
+ if(peakI===null){peakI=-1;let bb=-1;for(let i=0;i<N;i++)if(type[i]&&elev[i]>bb){bb=elev[i];peakI=i}}
+ const pkD=realOK&&demG&&demG.peak&&demG.peak.v>=50?demG.peak:null;if(OPT.peak&&(pkD||(peakI>=0&&elevM(peakI)>=50))){const kk=W*CS/(demG?demG.hx:1),wx=pkD?(pkD.x+.5)*kk:((peakI%W)+.5)*CS,wy=pkD?(pkD.y+.5)*kk:(((peakI/W)|0)+.5)*CS,px=z*(Math.cos(rot)*wx-Math.sin(rot)*wy)+ox,py=z*(Math.sin(rot)*wx+Math.cos(rot)*wy)+oy;if(px>10&&px<740&&py>10&&py<494){G.fillStyle='#fff';G.strokeStyle='#222';G.lineWidth=1.5;G.beginPath();G.moveTo(px,py-7);G.lineTo(px+6,py+4);G.lineTo(px-6,py+4);G.closePath();G.fill();G.stroke();G.font='600 11px system-ui,sans-serif';G.textAlign='left';G.lineWidth=3;G.strokeStyle='rgba(0,0,0,.65)';const t=fmtE(pkD?pkD.v:elevM(peakI));G.strokeText(t,px+9,py+3);G.fillStyle='#fff';G.fillText(t,px+9,py+3)}}
+ if(OPT.scale){const mpx=CS*z*(units==='metric'?1:1.609);let mi=1;for(const o of [1,2,5,10,20,50,100])if(o*mpx<=150)mi=o;const len=mi*mpx,bx=768-len-22,by=496;
+ G.lineJoin=G.lineCap='round';G.beginPath();G.moveTo(bx,by-9);G.lineTo(bx,by);G.lineTo(bx+len,by);G.lineTo(bx+len,by-9);G.strokeStyle='rgba(0,0,0,.7)';G.lineWidth=5;G.stroke();G.strokeStyle='#fff';G.lineWidth=2;G.stroke();
+ G.font='600 13px system-ui,sans-serif';G.textAlign='center';const st=mi+(units==='metric'?' km  ·  '+Math.round(mi*.621)+' mi':' mi  ·  '+Math.round(mi*1.609)+' km');G.lineWidth=3.5;G.strokeStyle='rgba(0,0,0,.7)';G.strokeText(st,bx+len/2,by-14);G.fillStyle='#fff';G.fillText(st,bx+len/2,by-14)}
+ topoDesc();const lg=$('leg');lg.innerHTML=layer==='sat'?'<span>Real satellite imagery (NASA GIBS / USGS). Habitat layers and scores are modelled from real land cover. If real data didn’t load, this view is simulated.</span>':layer==='time'?(realOK?'<span><b style="background:#1a5bab"></b>Water</span><span><b style="background:#358221"></b>Trees</span><span><b style="background:#87d19e"></b>Flooded vegetation</span><span><b style="background:#ffdb5c"></b>Crops</span><span><b style="background:#ed022a"></b>Built area</span><span><b style="background:#ede9e4"></b>Bare ground</span><span><b style="background:#c6ad8d"></b>Rangeland</span>':'<span><b style="background:#a68a66"></b>Cleared or degraded habitat</span><span><b style="background:#968e8a"></b>New built-up land</span><span><b style="background:#2f7d4f"></b>Protected by crossings or tunnels</span>'):layer==='habitat'?T.map(t=>`<span><b style="background:${t.c}"></b>${t.n}</span>`).join('')+'<span><b style="background:rgba(200,50,30,.4)"></b>Road disturbance zone</span>':
+ layer==='topo'?'<span>Elevation: <b style="background:hsl(110,45%,62%)"></b> low → <b style="background:hsl(25,45%,34%)"></b> high · 100 m elevation bands · shaded relief</span>':layer==='rich'?'<span>Species richness: <b style="background:hsl(65,65%,80%)"></b> few → <b style="background:hsl(135,65%,24%)"></b> many</span>':
+ `<span>${SP[sel].n} (${SP[sel].sc}): each colour is a separate connected habitat patch after the road</span>`}
+function act(x,y){if(x<0||y<0||x>=W||y>=H)return;
+ if(mode==='draw'){snap();pts.push({x,y});build();update()}
+ else if(mode==='cross'){if(!rd){$('hint').textContent='Draw a road first.';return}let best=null,bd=4;for(const p of samples){const d=Math.hypot(p.x-x,p.y-y);if(d<bd){bd=d;best=p}}
+  if(best){snap();cr.push({x:best.x,y:best.y});update()}else $('hint').textContent='Click closer to the road to place a crossing.'}
+ else if(mode==='tunnel'){if(!rd){$('hint').textContent='Draw a road first.';return}let bk=-1,bd=4;samples.forEach((p,k)=>{const d=Math.hypot(p.x-x,p.y-y);if(d<bd){bd=d;bk=k}});
+  if(bk<0){$('hint').textContent='Click closer to the road.';return}
+  if(tStart===null){tStart=sd[bk];$('hint').textContent='Now click where the tunnel should come out.';rq();return}
+  const a=Math.min(tStart,sd[bk]),b=Math.max(tStart,sd[bk]);tStart=null;
+  if(b-a<1.5){$('hint').textContent='A tunnel needs to be at least '+fmtD(1.5)+' long. Pick two points farther apart.';rq();return}
+  snap();tn=tn.filter(t=>t.e<a||t.s>b);tn.push({s:a,e:b});const mp=samples[Math.max(0,sd.findIndex(v=>v>=(a+b)/2))],lf=landform(Math.min(N-1,Math.floor(mp.y)*W+Math.floor(mp.x)));
+  update();$('hint').textContent='Tunnel added ('+fmtD(b-a)+') under '+lf.toLowerCase()+'. '+(lf==='Mountain'||lf==='Hill'?'Good fit: the habitat above stays connected.':'Tunnels under flat ground are rarely worth the cost.')}
+ else{const i=Math.floor(y)*W+Math.floor(x),here=SP.filter(s=>s.m[i]);selC={x:Math.floor(x),y:Math.floor(y)};rq();
+  $('info').innerHTML=`<b>${desc(i)}</b> · ${fmtE(elevM(i))} · slope ${Math.round(gr(i))}% · ${here.length} species here<br>`+(here.length?here.map(s=>`${s.n} <i>(${s.sc})</i> · ${s.st}`).join('<br>'):'No tracked species at this spot.')}}
+let pg=.6,rot=0,z=1,ox=0,oy=0,hov=null,drag=null,raf=0,selC=null;
+const rq=()=>{if(!raf)raf=requestAnimationFrame(()=>{raf=0;draw()})};
+function toG(ev){const r=cv.getBoundingClientRect(),px=(ev.clientX-r.left)/r.width*768,py=(ev.clientY-r.top)/r.height*504;const dx=px-ox,dy=py-oy,c=Math.cos(rot),sn=Math.sin(rot);return{px,py,x:(c*dx+sn*dy)/z/CS,y:(-sn*dx+c*dy)/z/CS}}
+function clampV(){const c=Math.cos(rot),sn=Math.sin(rot),dx=384-ox,dy=252-oy,wx=(c*dx+sn*dy)/z,wy=(-sn*dx+c*dy)/z,m=300/z,rl=realOK&&surr,hx=384/z,hy=252/z,nx=Math.max(rl?Math.max(-m,-2*W*CS+hx):-m,Math.min(rl?Math.min(W*CS+m,3*W*CS-hx):W*CS+m,wx)),ny=Math.max(rl?Math.max(-m,-2*H*CS+hy):-m,Math.min(rl?Math.min(H*CS+m,3*H*CS-hy):H*CS+m,wy));ox=384-z*(c*nx-sn*ny);oy=252-z*(sn*nx+c*ny)}
+function rotBy(d,px=384,py=252){const c=Math.cos(d),sn=Math.sin(d),dx=ox-px,dy=oy-py;ox=px+c*dx-sn*dy;oy=py+sn*dx+c*dy;rot+=d;clampV();rq()}
+function zoomAt(f,px,py){const nz=Math.min(5,Math.max(.4,z*f));ox=px-(px-ox)*nz/z;oy=py-(py-oy)*nz/z;z=nz;clampV();rq()}
+function tip(e,g){const t=$('tip');if(layer==='3d'||(drag&&drag.moved)||g.x<0||g.y<0||g.x>=W||g.y>=H){t.style.display='none';return}const i=Math.floor(g.y)*W+Math.floor(g.x),w=cv.parentNode.getBoundingClientRect();
+ t.style.display='block';t.style.left=Math.min(e.clientX-w.left+14,w.width-170)+'px';t.style.top=(e.clientY-w.top+14)+'px';
+ t.innerHTML=`<b>${desc(i)}</b><br>${fmtE(elevM(i))}${layer==='topo'?' · slope '+Math.round(gr(i))+'%':' · '+rich[i]+' species'}`+(rd?`<br>${fmtD(rd[i])} from road`:'')}
+const ptr=new Map();let gest=null;
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);const g=toG(e);ptr.set(e.pointerId,{px:g.px,py:g.py});
+ if(ptr.size===2){const[a,b]=[...ptr.values()];gest={ang:Math.atan2(b.py-a.py,b.px-a.px),dist:Math.hypot(b.px-a.px,b.py-a.py),mx:(a.px+b.px)/2,my:(a.py+b.py)/2};drag=null;return}
+ drag={px:g.px,py:g.py,ox,oy,moved:false,rot:e.shiftKey||e.button===2,lx:g.px,ly:g.py}});
+cv.addEventListener('pointermove',e=>{const g=toG(e);hov={x:g.x,y:g.y};if(ptr.has(e.pointerId))ptr.set(e.pointerId,{px:g.px,py:g.py});
+ if(gest&&ptr.size===2){const[a,b]=[...ptr.values()],ang=Math.atan2(b.py-a.py,b.px-a.px),dist=Math.hypot(b.px-a.px,b.py-a.py),mx=(a.px+b.px)/2,my=(a.py+b.py)/2;ox+=(mx-gest.mx)*pg;oy+=(my-gest.my)*pg;let da=ang-gest.ang;if(da>Math.PI)da-=2*Math.PI;if(da<-Math.PI)da+=2*Math.PI;const tw=(gest.tw||0)+da;if(Math.abs(tw)>.2)rotBy(da*.5,mx,my);if(gest.dist>0)zoomAt(Math.pow(dist/gest.dist,.7),mx,my);gest={ang,dist,mx,my,tw};return}
+ if(drag){const dx=g.px-drag.px,dy=g.py-drag.py;if(Math.hypot(dx,dy)>8)drag.moved=true;if(drag.moved){if(layer==='3d'){v3.yaw+=(g.px-drag.lx)*.008;v3.pitch=Math.max(.2,Math.min(1.5,v3.pitch-(g.py-drag.ly)*.006));drag.lx=g.px;drag.ly=g.py}else if(drag.rot){rotBy((g.px-drag.lx)*.01);drag.lx=g.px}else{ox=drag.ox+dx*pg;oy=drag.oy+dy*pg;clampV()}}}tip(e,g);rq()});
+cv.addEventListener('pointerup',e=>{ptr.delete(e.pointerId);if(ptr.size<2)gest=null;if(drag&&!drag.moved&&!drag.rot&&layer!=='3d'){const g=toG(e);act(g.x,g.y)}drag=null});
+cv.addEventListener('pointerleave',e=>{ptr.delete(e.pointerId);hov=null;$('tip').style.display='none';rq()});
+cv.addEventListener('wheel',e=>{e.preventDefault();if(layer==='3d'){v3.s=Math.max(.5,Math.min(3.5,v3.s*Math.exp(-Math.max(-80,Math.min(80,e.deltaY*(e.deltaMode===1?33:1)))*.0012)));rq();return}if(e.altKey||e.shiftKey){rotBy(e.deltaY*.002);return}const g=toG(e);zoomAt(Math.exp(-Math.max(-80,Math.min(80,e.deltaY*(e.deltaMode===1?33:1)))*.0007),g.px,g.py)},{passive:false});
+$('zi').onclick=()=>layer==='3d'?(v3.s=Math.min(3.5,v3.s*1.3),rq()):zoomAt(1.3,384,252);$('zo').onclick=()=>layer==='3d'?(v3.s=Math.max(.5,v3.s/1.3),rq()):zoomAt(1/1.3,384,252);$('zr').onclick=()=>{z=1;ox=oy=0;rot=0;v3={yaw:.5,pitch:.95,s:1};rq()};$('rl').onclick=()=>layer==='3d'?(v3.yaw-=Math.PI/12,rq()):rotBy(-Math.PI/12);$('rr').onclick=()=>layer==='3d'?(v3.yaw+=Math.PI/12,rq()):rotBy(Math.PI/12);$('rn').onclick=()=>layer==='3d'?(v3.yaw=0,rq()):rotBy(-rot);
+const hints={inspect:'Click anywhere to see which species live there. Scroll to zoom, drag to pan (past the edges too). Rotate with the ↺ ↻ buttons, Alt+scroll, right-drag, or a two-finger twist.',draw:'Click to add road points. Each point updates the score.',cross:'Click near the road to add a wildlife overpass or underpass.',tunnel:'Click the road where a tunnel starts, then where it ends. Tunnels work best under hills and mountains.'};
+document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{mode=b.dataset.m;tStart=null;document.querySelectorAll('[data-m]').forEach(x=>x.classList.toggle('on',x===b));$('hint').textContent=hints[mode]});
+document.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{layer=b.dataset.l;$('hint').textContent=layer==='3d'?'3D terrain: drag to spin and tilt, scroll to zoom. Switch to another layer to edit the road.':hints[mode];if(selC&&mode==='inspect'&&layer!=='3d')setTimeout(()=>act(selC.x+.5,selC.y+.5));document.querySelectorAll('[data-l]').forEach(x=>x.classList.toggle('on',x===b));draw();FS.mount()});
+$('spSel').innerHTML=SP.map((s,k)=>`<option value="${k}">${s.n}</option>`).join('');
+$('spSel').onchange=e=>{sel=+e.target.value;layer='species';setTimeout(()=>FS.mount(),0);document.querySelectorAll('[data-l]').forEach(x=>x.classList.toggle('on',x.dataset.l==='species'));draw()};
+let hist=[];
+const syncU=()=>{$('undo').disabled=!hist.length};
+function snap(o){o=o||{};hist.push({pts:pts.map(p=>({...p})),cr:cr.map(c=>({...c})),tn:tn.map(t=>({...t})),f:o.f!==undefined?o.f:$('fence').checked,b:o.b!==undefined?o.b:$('buf').checked,o:origPts&&origPts.map(p=>({...p})),sig:autoSig});if(hist.length>50)hist.shift();syncU()}
+function undo(){const h=hist.pop();syncU();if(!h){$('hint').textContent='Nothing to undo.';return}
+ pts=h.pts;cr=h.cr;tn=h.tn;origPts=h.o;autoSig=h.sig;tStart=null;$('fence').checked=h.f;$('buf').checked=h.b;build();update();$('hint').textContent='Undid the last action.'}
+$('undo').onclick=undo;
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key.toLowerCase()==='z'){e.preventDefault();undo()}});$('clr').onclick=()=>{if(pts.length)snap();pts=[];cr=[];tn=[];build();update()};
+$('regen').onclick=()=>{const g=GAZ[Math.floor(Math.random()*GAZ.length)];$('q').value=g.n;goTo(g.n)};
+['wd','tr','fence','buf'].forEach(id=>$(id).onchange=()=>{if(id==='fence')snap({f:!$('fence').checked});if(id==='buf')snap({b:!$('buf').checked});if(id==='wd')build();update()});
+$('reset').onclick=()=>{if(pts.length)snap();cr=[];tn=[];if(origPts&&JSON.stringify(pts)===autoSig){pts=origPts;origPts=null;build()}$('fence').checked=$('buf').checked=false;update()};
+let autoSig=null,origPts=null;
+let K=15,B0=1;
+function objv(){build();let t=0,len=0;for(let i=1;i<pts.length;i++){len+=Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y);if(i<pts.length-1){const u=Math.atan2(pts[i].y-pts[i-1].y,pts[i].x-pts[i-1].x),v=Math.atan2(pts[i+1].y-pts[i].y,pts[i+1].x-pts[i].x);let d=Math.abs(v-u);if(d>Math.PI)d=2*Math.PI-d;t+=d}}return evalR([],true,true).score+5*t/Math.PI+.03*len+K*costCalc(true,true,0).tot/B0}
+const inMap=q=>q.x>=.5&&q.y>=.5&&q.x<=W-.5&&q.y<=H-.5;
+function reshape(){cr=[];let cur=objv();
+ for(let i=pts.length-1;i>0;i--){const a=pts[i-1],b=pts[i],L=Math.hypot(b.x-a.x,b.y-a.y);if(L<12)continue;const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,nx=-(b.y-a.y)/L,ny=(b.x-a.x)/L;let best=null,bv=cur-1;
+  for(const o of [-9,-6,-3,3,6,9]){const q={x:mx+nx*o,y:my+ny*o};if(!inMap(q))continue;pts.splice(i,0,q);const v=objv();pts.splice(i,1);if(v<bv){bv=v;best=q}}
+  if(best){pts.splice(i,0,best);cur=bv}}
+ const moves=()=>{for(let i=1;i<pts.length-1;i++){const p=pts[i];let best=null,bv=cur-.01;for(let k=0;k<8;k++){const q={x:p.x+2.5*Math.cos(k*Math.PI/4),y:p.y+2.5*Math.sin(k*Math.PI/4)};if(!inMap(q))continue;pts[i]=q;const v=objv();if(v<bv){bv=v;best=q}}pts[i]=best||p;if(best)cur=bv}};
+ moves();moves();
+ for(let i=pts.length-2;i>0;i--){const p=pts[i];pts.splice(i,1);const v=objv();if(v<=cur+.2)cur=v;else pts.splice(i,0,p)}
+ moves();objv()}
+$('auto').onclick=()=>{if(!rd){$('hint').textContent='Draw a road first, then auto-improve it.';return}snap();$('fence').checked=$('buf').checked=true;
+ const nb=Math.max(0,pts.length-2),before=evalR(cr,false,false).score;origPts=pts.map(p=>({...p}));tn=[];cr=[];K=+$('bp').value;const cost0=costCalc(false,false,0).tot;B0=Math.max(1,costCalc(true,true,0).tot);const pen=n=>K*costCalc(true,true,n).tot/B0;reshape();autoSig=JSON.stringify(pts);
+ for(let k=0;k<6;k++){let best=null,bs=evalR(cr,true,true).score+pen(cr.length);for(let i=0;i<samples.length;i+=4){const p=samples[i];if(cr.some(c=>Math.hypot(c.x-p.x,c.y-p.y)<3.5))continue;const s=evalR([...cr,p],true,true).score+pen(cr.length+1);if(s<bs-.4){bs=s;best=p}}if(!best)break;cr.push({x:best.x,y:best.y})}
+ const L0=sd[sd.length-1];let tAdded=0;
+ const needT=()=>{const e=evalR(cr,true,true);return e.score>30||e.crit.some(c=>!c.ok)};
+ for(let k=0;k<4&&needT();k++){const cw=evalR(cr,true,true).score>50?.25:1;let best=null,bs=evalR(cr,true,true).score+cw*pen(cr.length);
+  for(const tl of[3,6])for(let s=0;s+tl<=L0;s+=2){if(tn.some(t=>!(t.e<s||t.s>s+tl)))continue;const sv=tn;tn=[...tn,{s,e:s+tl}];const v=evalR(cr,true,true).score+cw*pen(cr.length);tn=sv;if(v<bs-.5){bs=v;best={s,e:s+tl}}}
+  if(!best)break;tn.push(best);tAdded++}
+ const cost1=costCalc(true,true,cr.length).tot;update();$('hint').textContent='Auto-improve (cost-aware, '+$('bp').options[$('bp').selectedIndex].text.toLowerCase()+') reshaped the road ('+nb+' bend'+(nb==1?'':'s')+' → '+Math.max(0,pts.length-2)+') and added '+cr.length+' crossing'+(cr.length==1?'':'s')+(tAdded?' and '+tAdded+' tunnel'+(tAdded==1?'':'s')+' where needed':'')+'. Estimated cost '+money(cost1)+' vs '+money(cost0)+' for the original road ('+(cost1>=cost0?'+':'−')+Math.round(Math.abs(cost1/cost0-1)*100)+'%). Use Remove improvements to restore your original shape.'};
+const PLACES=['Amazon rainforest','Sahara Desert','Serengeti, Tanzania','Yellowstone National Park','Great Barrier Reef coast','Siberian taiga','Scottish Highlands','Borneo','Patagonia','Himalayas, Nepal','Okavango Delta','Kakadu, Australia','Alaska North Slope','Madagascar','Pantanal, Brazil','Norwegian fjords'];
+const DEFSP=SP.map(s=>({...s})),STW={LC:1,NT:1.3,VU:1.7,EN:2.2,CR:3},HAB={urban:5,wetland:1,forest:2,grassland:3,grass:3,scrub:4,shrub:4,desert:4},c01=v=>Math.max(0,Math.min(1,+v||0)),cl=t=>String(t==null?'':t).replace(/[<>&"`]/g,'').slice(0,60);
+function rankTypes(MV){const c=climate,idx=[...Array(N).keys()],byE=idx.slice().sort((a,b)=>elev[a]-elev[b]),nw=Math.round(c.water*N),left=[];
+ byE.forEach((i,k)=>{if(k<nw)type[i]=0;else left.push(i)});const nu=Math.round((c.urban||0)*N);if(nu>0){const r=mb(seedN*29);let cx=32,cy=21;for(let t=0;t<200;t++){const i=left[Math.floor(r()*left.length)];if(i!==undefined&&elev[i]<.6){cx=i%W;cy=(i/W)|0;break}}
+  const dist=i=>Math.hypot(i%W-cx,((i/W)|0)-cy)+4*(MV[i]-.5);left.sort((a,b)=>dist(a)-dist(b));const m=Math.min(nu,left.length);for(let k=0;k<m;k++)type[left[k]]=5;left.splice(0,m)}
+ left.sort((a,b)=>(MV[b]-elev[b])-(MV[a]-elev[a]));
+ const tot=(c.wetland+c.forest+c.grass+c.scrub)||1,take=f=>Math.round(left.length*f/tot),nWet=take(c.wetland);let p=0;for(let k=0;k<nWet;k++)type[left[p++]]=1;
+ const rest=left.slice(p).sort((a,b)=>MV[b]-MV[a]),nF=take(c.forest),nG=take(c.grass);rest.forEach((i,k)=>{type[i]=k<nF?2:k<nF+nG?3:4})}
+function heur(la){const a=Math.abs(la);return a<15?{water:.1,wetland:.1,forest:.5,grass:.2,scrub:.1}:a<35?{water:.1,wetland:.05,forest:.15,grass:.3,scrub:.4}:a<55?{water:.12,wetland:.08,forest:.4,grass:.3,scrub:.1}:{water:.2,wetland:.12,forest:.1,grass:.3,scrub:.28}}
+function fillSp(){const s=$('spSel');s.textContent='';SP.forEach((p,k)=>{const o=document.createElement('option');o.value=k;o.textContent=p.n;s.appendChild(o)});sel=0}
+function applyPlace(p){const m=p.mix||{};climate={water:c01(m.water),wetland:c01(m.wetland),forest:c01(m.forest),grass:c01(m.grass),scrub:c01(m.scrub),urban:c01(m.urban)};autoUrban=climate.urban;if($('ls').value!=='auto')climate.urban=+$('ls').value;
+ if(climate.water+climate.wetland+climate.forest+climate.grass+climate.scrub<.2)climate=heur(p.lat);rf=.2+1.8*c01(p.relief);
+ let ns=[];if(Array.isArray(p.species))ns=p.species.slice(0,10).map(s=>({n:cl(s.name),sc:cl(s.scientific),st:STW[s.status]?s.status:'LC',hab:(s.habitats||[]).map(h=>HAB[String(h).toLowerCase()]).filter(Boolean),sens:Math.max(.2,Math.min(1,+s.sensitivity||.5))})).filter(s=>s.n);
+ ns.forEach(s=>{if(!s.hab.length)s.hab=[2,3];s.w=STW[s.st]});SP.length=0;SP.push(...(ns.length>=4?ns:DEFSP.map(s=>({...s}))));
+ geo={lat:p.lat,lon:p.lon};updCmp();mtitle=p.name?cl(p.name):p.lat.toFixed(2)+'°, '+p.lon.toFixed(2)+'°';seedN=placeSeed(p.lat,p.lon);fillSp();gen();update();realLoad(p.lat,p.lon)}
+/* ===== Built-in place list, so search works even when online lookups are blocked ===== */
+const GAZ=`Santa Cruz Mountains|37.20|-122.10;Amazon rainforest|-3.47|-62.21;Sahara Desert|23.4|13.0;Serengeti, Tanzania|-2.33|34.83;Yellowstone National Park|44.43|-110.59;Great Barrier Reef coast|-18.29|147.70;Siberian taiga|62.0|105.0;Scottish Highlands|57.12|-4.71;Borneo|0.96|114.55;Patagonia|-46.0|-71.5;Himalayas, Nepal|28.6|84.0;Okavango Delta|-19.28|22.90;Kakadu, Australia|-12.67|132.83;Alaska North Slope|69.5|-150.0;Madagascar|-18.77|46.87;Pantanal, Brazil|-17.66|-57.45;Norwegian fjords|62.10|7.21;Grand Canyon|36.11|-112.11;Yosemite National Park~Yosemite|37.87|-119.54;Glacier National Park~Glacier|48.76|-113.79;Great Smoky Mountains|35.61|-83.43;Everglades National Park~Everglades|25.29|-80.90;Denali National Park~Denali|63.33|-150.50;Grand Teton National Park~Grand Teton|43.79|-110.68;Zion National Park~Zion|37.30|-113.03;Olympic National Park~Olympic|47.80|-123.60;Rocky Mountain National Park|40.34|-105.68;Death Valley|36.46|-116.87;Joshua Tree National Park~Joshua Tree|33.87|-115.90;Sequoia National Park|36.49|-118.57;Big Sur|36.27|-121.81;Channel Islands|34.01|-119.77;Banff National Park~Banff|51.50|-116.00;Jasper National Park~Jasper|52.87|-118.08;Algonquin Park|45.84|-78.37;Yukon|64.28|-135.0;Galápagos Islands~Galapagos|-0.74|-90.31;Atacama Desert|-23.86|-69.13;Machu Picchu|-13.16|-72.55;Iguazu Falls|-25.69|-54.44;Torres del Paine|-51.0|-73.0;Kruger National Park~Kruger|-23.99|31.55;Masai Mara|-1.5|35.14;Victoria Falls|-17.92|25.86;Kilimanjaro|-3.07|37.35;Congo Basin|0.0|22.0;Namib Desert|-24.73|15.29;Kalahari Desert~Kalahari|-23.0|22.0;Ngorongoro Crater|-3.17|35.58;Mount Everest~Everest|27.99|86.93;Bhutan|27.47|89.64;Western Ghats|11.0|76.5;Sundarbans|21.95|89.18;Gobi Desert~Gobi|42.8|105.0;Lake Baikal~Baikal|53.5|108.0;Kamchatka|56.0|160.0;Hokkaido|43.2|142.9;Sumatra|0.5|101.5;Uluru|-25.34|131.04;Tasmania|-42.0|146.0;Fiordland, New Zealand~Fiordland|-45.4|167.7;Swiss Alps~Alps|46.55|8.0;Pyrenees|42.7|0.5;Carpathians|47.0|25.0;Black Forest|48.0|8.2;Lake District|54.46|-3.09;Dolomites|46.4|11.9;Lapland|68.0|25.0;Svalbard|78.2|15.6;Iceland|64.96|-19.02;Chernobyl|51.39|30.10;Białowieża Forest~Bialowieza|52.70|23.87;Danube Delta|45.2|29.5;Camargue|43.52|4.53;New York~NYC~New York City|40.71|-74.01;Los Angeles|34.05|-118.24;Chicago|41.88|-87.63;Houston|29.76|-95.37;Phoenix|33.45|-112.07;Philadelphia|39.95|-75.17;San Antonio|29.42|-98.49;San Diego|32.72|-117.16;Dallas|32.78|-96.80;San Jose|37.34|-121.89;Austin|30.27|-97.74;San Francisco|37.77|-122.42;Seattle|47.61|-122.33;Denver|39.74|-104.99;Washington DC~Washington D.C.|38.91|-77.04;Boston|42.36|-71.06;Las Vegas|36.17|-115.14;Portland|45.52|-122.68;Atlanta|33.75|-84.39;Miami|25.76|-80.19;Minneapolis|44.98|-93.27;Detroit|42.33|-83.05;Salt Lake City|40.76|-111.89;Nashville|36.16|-86.78;New Orleans|29.95|-90.07;Honolulu|21.31|-157.86;Anchorage|61.22|-149.90;Lompoc|34.64|-120.46;Santa Barbara|34.42|-119.70;Sacramento|38.58|-121.49;Orlando|28.54|-81.38;Kansas City|39.10|-94.58;St. Louis~Saint Louis|38.63|-90.20;Pittsburgh|40.44|-79.99;Cleveland|41.50|-81.69;Albuquerque|35.08|-106.65;Boise|43.62|-116.20;Billings|45.78|-108.50;Toronto|43.65|-79.38;Vancouver|49.28|-123.12;Montreal|45.50|-73.57;Calgary|51.05|-114.07;Ottawa|45.42|-75.70;Edmonton|53.55|-113.49;Winnipeg|49.90|-97.14;Halifax|44.65|-63.57;Whitehorse|60.72|-135.06;Yellowknife|62.45|-114.37;Mexico City|19.43|-99.13;Guadalajara|20.66|-103.35;Cancún~Cancun|21.16|-86.85;Guatemala City|14.63|-90.51;San José, Costa Rica~San Jose Costa Rica|9.93|-84.08;Panama City|8.98|-79.52;Havana|23.11|-82.37;Bogotá~Bogota|4.71|-74.07;Medellín~Medellin|6.24|-75.58;Quito|-0.18|-78.47;Lima|-12.05|-77.04;Cusco|-13.53|-71.97;La Paz|-16.50|-68.15;Santiago|-33.45|-70.67;Buenos Aires|-34.60|-58.38;Montevideo|-34.90|-56.16;São Paulo~Sao Paulo|-23.55|-46.63;Rio de Janeiro~Rio|-22.91|-43.17;Brasília~Brasilia|-15.79|-47.88;Manaus|-3.12|-60.02;Caracas|10.48|-66.90;Asunción~Asuncion|-25.26|-57.58;London|51.51|-0.13;Paris|48.86|2.35;Berlin|52.52|13.40;Madrid|40.42|-3.70;Barcelona|41.39|2.17;Rome|41.90|12.50;Milan|45.46|9.19;Amsterdam|52.37|4.90;Brussels|50.85|4.35;Vienna|48.21|16.37;Zurich|47.38|8.54;Munich|48.14|11.58;Prague|50.08|14.44;Warsaw|52.23|21.01;Budapest|47.50|19.04;Athens|37.98|23.73;Lisbon|38.72|-9.14;Dublin|53.35|-6.26;Edinburgh|55.95|-3.19;Glasgow|55.86|-4.25;Copenhagen|55.68|12.57;Stockholm|59.33|18.07;Oslo|59.91|10.75;Helsinki|60.17|24.94;Reykjavik|64.15|-21.94;Moscow|55.76|37.62;Saint Petersburg~St. Petersburg|59.93|30.34;Kyiv~Kiev|50.45|30.52;Istanbul|41.01|28.98;Bucharest|44.43|26.10;Bergen|60.39|5.32;Tromsø~Tromso|69.65|18.96;Cairo|30.04|31.24;Lagos|6.52|3.38;Nairobi|-1.29|36.82;Addis Ababa|9.03|38.74;Johannesburg|-26.20|28.05;Cape Town|-33.92|18.42;Accra|5.60|-0.19;Dakar|14.72|-17.47;Casablanca|33.57|-7.59;Marrakesh~Marrakech|31.63|-8.01;Algiers|36.75|3.06;Tunis|36.81|10.18;Kinshasa|-4.44|15.27;Dar es Salaam|-6.79|39.21;Kampala|0.35|32.58;Windhoek|-22.56|17.08;Maputo|-25.97|32.57;Antananarivo|-18.88|47.51;Khartoum|15.50|32.56;Tokyo|35.68|139.69;Osaka|34.69|135.50;Kyoto|35.01|135.77;Sapporo|43.06|141.35;Seoul|37.57|126.98;Beijing|39.90|116.41;Shanghai|31.23|121.47;Hong Kong|22.32|114.17;Chengdu|30.57|104.07;Taipei|25.03|121.57;Bangkok|13.76|100.50;Hanoi|21.03|105.85;Ho Chi Minh City~Saigon|10.82|106.63;Singapore|1.35|103.82;Kuala Lumpur|3.14|101.69;Jakarta|-6.21|106.85;Manila|14.60|120.98;Delhi~New Delhi|28.61|77.21;Mumbai~Bombay|19.08|72.88;Bangalore~Bengaluru|12.97|77.59;Kolkata~Calcutta|22.57|88.36;Chennai|13.08|80.27;Kathmandu|27.72|85.32;Dhaka|23.81|90.41;Colombo|6.93|79.86;Karachi|24.86|67.01;Tehran|35.69|51.39;Baghdad|33.31|44.37;Riyadh|24.71|46.68;Dubai|25.20|55.27;Jerusalem|31.77|35.22;Tashkent|41.30|69.24;Ulaanbaatar|47.89|106.91;Almaty|43.24|76.89;Sydney|-33.87|151.21;Melbourne|-37.81|144.96;Brisbane|-27.47|153.03;Perth|-31.95|115.86;Adelaide|-34.93|138.60;Darwin|-12.46|130.84;Cairns|-16.92|145.77;Hobart|-42.88|147.33;Auckland|-36.85|174.76;Wellington|-41.29|174.78;Queenstown|-45.03|168.66;Suva, Fiji~Fiji|-18.14|178.44;Port Moresby|-9.44|147.18;United States~USA~US|39.8|-98.6;Canada|56.1|-106.3;Mexico|23.6|-102.5;Brazil|-10.0|-52.0;Argentina|-34.0|-64.0;Chile|-35.7|-71.5;Peru|-9.2|-75.0;Colombia|4.6|-74.1;Costa Rica|9.75|-83.75;Australia|-25.3|133.8;New Zealand|-41.0|174.0;Japan|36.2|138.3;China|35.9|104.2;India|20.6|78.96;Indonesia|-0.8|113.9;Thailand|15.9|100.99;Vietnam|14.06|108.28;Kenya|0.02|37.9;Tanzania|-6.37|34.89;South Africa|-30.56|22.94;Egypt|26.8|30.8;Morocco|31.8|-7.1;Ethiopia|9.15|40.49;Norway|60.47|8.47;Sweden|60.13|18.64;Finland|61.92|25.75;United Kingdom~UK~Britain|55.4|-3.4;Ireland|53.4|-8.2;France|46.2|2.2;Spain|40.46|-3.75;Italy|41.87|12.57;Germany|51.17|10.45;Switzerland|46.82|8.23;Poland|51.9|19.1;Russia|61.5|105.3;Mongolia|46.9|103.8;California|36.78|-119.42;Oregon|43.8|-120.55;Washington State|47.75|-120.74;Montana|46.88|-110.36;Wyoming|43.08|-107.29;Colorado|39.55|-105.78;Utah|39.32|-111.09;Arizona|34.05|-111.09;New Mexico|34.52|-105.87;Texas|31.97|-99.90;Florida|27.66|-81.52;Alaska|64.2|-149.49;Hawaii|19.9|-155.58;Maine|45.25|-69.45;Vermont|44.56|-72.58;North Carolina|35.76|-79.02;Louisiana|30.98|-91.96;Michigan|44.31|-85.60;Minnesota|46.73|-94.69;Idaho|44.07|-114.74;Nevada|38.80|-116.42`.split(';').map(r=>{const[a,la,lo]=r.split('|'),nm=a.split('~');return{n:nm[0],al:nm,la:+la,lo:+lo,rl:.3}});
+const nz=t=>String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+GAZ.forEach(g=>{g.k=g.al.map(nz)});
+function gazFind(q){const full=nz(q),first=nz(String(q).split(',')[0]);if(full.length<2)return null;
+ for(const t of[full,first])for(const g of GAZ)if(g.k.includes(t))return g;
+ for(const t of[full,first]){if(t.length<3)continue;for(const g of GAZ)if(g.k.some(k=>k.startsWith(t)))return g}
+ for(const t of[full,first]){if(t.length<4)continue;for(const g of GAZ)if(g.k.some(k=>k.includes(t)))return g}
+ return null}
+(()=>{const dl=document.createElement('datalist');dl.id='gz';GAZ.forEach(g=>{const o=document.createElement('option');o.value=g.n;dl.appendChild(o)});document.body.appendChild(dl);$('q').setAttribute('list','gz')})();
+/* ===== Real-data mode: real land cover, elevation and imagery for the chosen place =====
+   Land cover: Sentinel-2 10 m Land Use/Land Cover time series (Impact Observatory, Microsoft, Esri), ArcGIS Living Atlas ImageServer.
+   Elevation: OpenTopoData public API.  Imagery: Esri World Imagery tiles.  If any of it can't load, the page says so and keeps a simulated fallback. */
+let realOK=false,realFailed=false,realTok=0,realImg=null,rbox=null,lastReal=null,rYears={},rStats={};
+let ryMin=2017,ryMax=2024;const tyMin=()=>realOK?ryMin:0,tyMax=()=>realOK?ryMax:30;
+const LCU='https://ic.imagery1.arcgis.com/arcgis/rest/services/Sentinel2_10m_LandCover/ImageServer/exportImage';
+const IOP={1:[26,91,171],2:[53,130,33],4:[135,209,158],5:[255,219,92],7:[237,2,42],8:[237,233,228],9:[242,250,255],10:[200,200,200],11:[198,173,141]};
+const IOT={1:0,4:1,2:2,5:3,11:4,8:4,9:4,7:5};
+const DSN={ned10m:'USGS National Elevation Dataset 10 m (via OpenTopoData)',hillshade:'terrain ESTIMATED from Esri World Hillshade (real shaded relief; heights are approximate, not measured)',openmeteo:'Copernicus 90 m DEM (via Open-Meteo)',terrarium:'global elevation tiles (Mapzen Terrarium, AWS Open Data), sampled every 250 m',mapzen:'global terrain (Mapzen, via OpenTopoData)',srtm30m:'NASA SRTM 30 m (via OpenTopoData)',aster30m:'NASA/METI ASTER GDEM 30 m (via OpenTopoData)'};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms)),rstat=(h,c)=>{const t=String(h).replace(/<[^>]+>/g,''),sh=/^⏳/.test(t)?'⏳ Loading real data…':/SIMULATED/.test(t)?'● Simulated (real data not loaded)':'● Real data';const e=$('rstat');if(e){e.innerHTML=/SIMULATED/.test(t)?h:sh;e.style.color=c||''}const b=$('stb');if(b){b.textContent=sh;b.title='Click for details';b.style.color=c||''}};
+const lon2x=(lo,z)=>(lo+180)/360*2**z,lat2y=(la,z)=>(1-Math.log(Math.tan(la*Math.PI/180)+1/Math.cos(la*Math.PI/180))/Math.PI)/2*2**z;
+function bboxOf(lat,lon){const dLa=1/110.57,dLo=1/(111.32*Math.max(.2,Math.cos(lat*Math.PI/180)));return{w:lon-W/2*dLo,e:lon+W/2*dLo,s:lat-H/2*dLa,n:lat+H/2*dLa,dLo,dLa}}
+async function getBmp(url,ms){const r=await fetch(url,{signal:AbortSignal.timeout(ms||25000)});if(!r.ok)throw new Error('HTTP '+r.status);const b=await r.blob();if(!/image/.test(b.type))throw new Error('the service did not return an image');return createImageBitmap(b)}
+/* ===== Data sources. By default ONLY .gov / .org services are used:
+   NASA GIBS (gibs.earthdata.nasa.gov): satellite imagery + MODIS land cover, worldwide.  USGS National Map (nationalmap.gov): aerial imagery in the US.
+   OpenTopoData (opentopodata.org): NASA SRTM / ASTER and USGS NED elevation.  GBIF (gbif.org) and OpenStreetMap Nominatim (openstreetmap.org) for species and place search.
+   "Also allow commercial fallbacks" (Data sources button) adds the older .com services (Esri, Impact Observatory, AWS, Open-Meteo) as first choice again. ===== */
+const OPEN=true;
+const srcUsed={lc:'',el:'',img:''};let imgSel=null,elevDS='';
+const inUS=b=>{const la=(b.n+b.s)/2,lo=(b.w+b.e)/2;return(la>24&&la<50&&lo>-125&&lo<-66)||(la>51&&la<72&&lo>-170&&lo<-129)||(la>18&&la<23&&lo>-161&&lo<-154)};
+const GIBS='https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/';let gCap=null;
+/* The layer list (ids, tile matrix sets, URL templates, date ranges) is read from NASA's own WMTS capabilities file instead of being guessed. */
+async function gibsCap(){if(gCap)return gCap;const r=await fetch(GIBS+'1.0.0/WMTSCapabilities.xml',{signal:AbortSignal.timeout(40000)});if(!r.ok)throw new Error('NASA GIBS HTTP '+r.status);
+ const x=new DOMParser().parseFromString(await r.text(),'text/xml'),L={};
+ for(const l of x.getElementsByTagName('Layer')){const id=(l.getElementsByTagNameNS('*','Identifier')[0]||{}).textContent;if(!id)continue;
+  const ru=l.getElementsByTagName('ResourceURL')[0],tl=l.getElementsByTagName('TileMatrixSetLink')[0],tms=tl&&(tl.getElementsByTagName('TileMatrixSet')[0]||{}).textContent;if(!ru||!tms)continue;
+  const tm=ru.getAttribute('template'),mm=/Level(\d+)$/.exec(tms),dim=l.getElementsByTagName('Dimension')[0],vals=dim?[...dim.getElementsByTagName('Value')].map(v=>v.textContent):[];let t0=null,t1=null;
+  vals.forEach(v=>{const a=v.split('/'),y0=+a[0].slice(0,4),y1=+(a[1]||a[0]).slice(0,4);if(y0)t0=t0===null?y0:Math.min(t0,y0);if(y1)t1=t1===null?y1:Math.max(t1,y1)});
+  L[id]={id,tms,max:mm?+mm[1]:8,tm,timed:/\{Time\}/.test(tm),tmin:t0,tmax:t1,def:dim&&(dim.getElementsByTagName('Default')[0]||{}).textContent}}
+ if(!Object.keys(L).length)throw new Error('NASA GIBS layer list was empty');gCap=L;return L}
+async function gibsLayer(pats){let L=null;try{L=await gibsCap()}catch(e){}if(L)for(const re of pats){const k=Object.keys(L).find(id=>re.test(id));if(k)return L[k]}return null}
+const gTile=(L,z,y,x,t)=>L.tm.replace('{Time}',t||L.def||'default').replace('{TileMatrixSet}',L.tms).replace('{TileMatrix}',z).replace('{TileRow}',y).replace('{TileCol}',x);
+const GFALL={id:'BlueMarble_ShadedRelief_Bathymetry',tms:'GoogleMapsCompatible_Level8',max:8,timed:false,tm:GIBS+'BlueMarble_ShadedRelief_Bathymetry/default/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}.jpeg'};
+async function imgSources(b){const S=[],us=inUS(b);
+ if(!OPEN)S.push({name:'Esri World Imagery',max:19,url:(z,y,x)=>`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`});
+ if(us)S.push({name:'USGS National Map imagery',max:16,url:(z,y,x)=>`https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/${z}/${y}/${x}`});
+ const g=(await gibsLayer([/^BlueMarble_NextGeneration$/,/^BlueMarble_ShadedRelief_Bathymetry$/,/^BlueMarble/]))||GFALL;S.push({name:'NASA Blue Marble (NASA GIBS)',max:g.max,url:(z,y,x)=>gTile(g,z,y,x)});return S}
+/* MODIS land cover (IGBP classes, 500 m) regrouped into the six habitat types this page uses */
+const IGBP=[null,[5,69,10],[8,106,16],[84,167,8],[120,210,3],[0,153,0],[198,176,68],[220,209,89],[218,222,72],[251,255,19],[182,255,5],[39,255,135],[194,79,68],[165,165,165],[255,109,76],[105,255,248],[249,255,164],[28,13,255]],IGBP2IO=[0,2,2,2,2,2,11,11,11,5,5,4,5,7,5,9,8,1];
+async function getLCgibs(b,year){const L=await gibsLayer([/IGBP/i,/Land_?Cover/i]);if(!L)throw new Error('no NASA land cover layer found');
+ const tmin=L.tmin||2001,tmax=L.tmax||2022,yr=Math.max(tmin,Math.min(tmax,year||tmax)),time=L.timed?yr+'-01-01':null,Ph=168,Pw=Math.round((b.e-b.w)/(b.dLa*H/Ph));
+ let z=Math.min(L.max,9),x0,x1,y0,y1,n,nx,ny;for(;;){n=2**z;x0=Math.floor(lon2x(b.w,z));x1=Math.floor(lon2x(b.e,z));y0=Math.max(0,Math.floor(lat2y(b.n,z)));y1=Math.min(n-1,Math.floor(lat2y(b.s,z)));nx=x1-x0+1;ny=y1-y0+1;if(nx*ny<=16||z<=2)break;z--}
+ const jobs=[];for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)jobs.push(loadTile(gTile(L,z,y,((x%n)+n)%n,time)));const ims=await Promise.all(jobs);
+ if(ims.filter(Boolean).length<ims.length*.7)throw new Error('NASA land cover tiles unavailable');
+ const m=document.createElement('canvas');m.width=nx*256;m.height=ny*256;const mx=m.getContext('2d');ims.forEach((im,i)=>{if(im)mx.drawImage(im,(i%nx)*256,Math.floor(i/nx)*256)});
+ const c=document.createElement('canvas');c.width=Pw;c.height=Ph;const cx=c.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=false;
+ cx.drawImage(m,(lon2x(b.w,z)-x0)*256,(lat2y(b.n,z)-y0)*256,(lon2x(b.e,z)-lon2x(b.w,z))*256,(lat2y(b.s,z)-lat2y(b.n,z))*256,0,0,Pw,Ph);
+ const d=cx.getImageData(0,0,Pw,Ph).data,cls=new Uint8Array(Pw*Ph);let seen=0,ok=0;
+ for(let i=0;i<Pw*Ph;i++){const a=d[i*4+3];if(a<128)continue;seen++;const r=d[i*4],g=d[i*4+1],bl=d[i*4+2];let bd=1e9,bk=0;for(let k=1;k<=17;k++){const p=IGBP[k],dd=(p[0]-r)**2+(p[1]-g)**2+(p[2]-bl)**2;if(dd<bd){bd=dd;bk=k}}if(bd<=3600){cls[i]=IGBP2IO[bk];ok++}}
+ if(!seen||ok<seen*.5||ok<Pw*Ph*.05)throw new Error('NASA land cover colours not recognised');return{cls,Pw,Ph,yr:[tmin,tmax]}}
+async function getLC(b,year){const tr=OPEN?['gibs']:['io','gibs'];let le;for(const t of tr){try{if(t==='io'){const r=await getLCio(b,year);r.yr=[2017,2024];srcUsed.lc='Impact Observatory, Microsoft, Esri';return r}const r=await getLCgibs(b,year);srcUsed.lc='NASA MODIS land cover (NASA GIBS)';return r}catch(e){le=e}}throw le}
+async function getLCio(b,year){let le;for(let k=0;k<3;k++){try{return await getLC1(b,year)}catch(e){le=e;if(/no land cover/.test(String(e.message)))break;await sleep(1200*(k+1))}}throw le}
+async function getLC1(b,year){const Ph=168,Pw=Math.round((b.e-b.w)/(b.dLa*H/Ph));
+ let u=`${LCU}?bbox=${b.w},${b.s},${b.e},${b.n}&bboxSR=4326&imageSR=4326&size=${Pw},${Ph}&format=png&pixelType=U8&interpolation=RSP_NearestNeighbor&f=image`;
+ if(year)u+=`&time=${Date.UTC(year,0,1)},${Date.UTC(year,11,31)}`;
+ const bm=await getBmp(u),c=document.createElement('canvas');c.width=Pw;c.height=Ph;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(bm,0,0,Pw,Ph);
+ const d=x.getImageData(0,0,Pw,Ph).data,cls=new Uint8Array(Pw*Ph);let ok=0;
+ for(let i=0;i<Pw*Ph;i++){const r=d[i*4],g=d[i*4+1],bl=d[i*4+2],a=d[i*4+3];let k=0;
+  if(a>0){if(r===g&&g===bl&&r>=1&&r<=11)k=r;else{let bd=1e9;for(const q in IOP){const p=IOP[q],dd=(p[0]-r)**2+(p[1]-g)**2+(p[2]-bl)**2;if(dd<bd){bd=dd;k=+q}}if(bd>4000)k=0}}
+  cls[i]=k;if(k)ok++}
+ if(ok<Pw*Ph*.05)throw new Error('no land cover data returned for this place');return{cls,Pw,Ph}}
+function lcFromImagery(img,b){const Ph=168,Pw=Math.round((b.e-b.w)/(b.dLa*H/Ph)),c=document.createElement('canvas');c.width=Pw;c.height=Ph;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0,Pw,Ph);
+ const d=x.getImageData(0,0,Pw,Ph).data,cls=new Uint8Array(Pw*Ph);
+ for(let i=0;i<Pw*Ph;i++){const r=d[i*4],g=d[i*4+1],bl=d[i*4+2],mx=Math.max(r,g,bl),mn=Math.min(r,g,bl),lum=.299*r+.587*g+.114*bl,sat=mx?(mx-mn)/mx:0;let k;
+  if((bl>r+10&&bl>g-8&&lum<150)||(lum<40&&bl>=r-2))k=1;
+  else if(lum>212&&sat<.14)k=9;
+  else if(g>=r-2&&g>=bl&&sat>.1)k=lum<95?2:5;
+  else if(sat<.11&&lum>=95&&lum<=195)k=7;
+  else if(r>=g&&g>=bl&&lum>=105)k=11;
+  else k=lum<75?2:11;
+  cls[i]=k}
+ return{cls,Pw,Ph}}
+function cellsFromLC(lc){const{cls,Pw,Ph}=lc,t=new Int8Array(N).fill(-1);
+ for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){const x0=Math.floor(cx*Pw/W),x1=Math.max(x0+1,Math.floor((cx+1)*Pw/W)),y0=Math.floor(cy*Ph/H),y1=Math.max(y0+1,Math.floor((cy+1)*Ph/H)),cnt={};let tot=0;
+  for(let yy=y0;yy<y1;yy++)for(let xx=x0;xx<x1;xx++){const k=cls[yy*Pw+xx];if(!k||k===10)continue;cnt[k]=(cnt[k]||0)+1;tot++}
+  if(!tot)continue;let best=0,bn=0;for(const k in cnt)if(cnt[k]>bn){bn=cnt[k];best=+k}
+  if((cnt[7]||0)/tot>=.2)best=7;else if((cnt[1]||0)/tot>=.5)best=1;t[cy*W+cx]=IOT[best]}
+ for(let pass=0;pass<30;pass++){let left=0;const c=t.slice();for(let i=0;i<N;i++){if(t[i]>=0)continue;const x=i%W,y=(i/W)|0;let v=-1;for(const j of[x>0?i-1:-1,x<W-1?i+1:-1,y>0?i-W:-1,y<H-1?i+W:-1])if(j>=0&&t[j]>=0){v=t[j];break}if(v>=0)c[i]=v;else left++}t.set(c);if(!left)break}
+ for(let i=0;i<N;i++)if(t[i]<0)t[i]=3;return Uint8Array.from(t)}
+function colorize(lc){const{cls,Pw,Ph}=lc,c=document.createElement('canvas');c.width=Pw;c.height=Ph;const x=c.getContext('2d'),im=x.createImageData(Pw,Ph);
+ for(let i=0;i<Pw*Ph;i++){const p=IOP[cls[i]]||[70,70,70];im.data[i*4]=p[0];im.data[i*4+1]=p[1];im.data[i*4+2]=p[2];im.data[i*4+3]=255}x.putImageData(im,0,0);return c}
+function lcStats(lc){const s={},a=W*H/(lc.Pw*lc.Ph);for(let i=0;i<lc.cls.length;i++){const k=lc.cls[i];if(k)s[k]=(s[k]||0)+a}return s}
+async function getElevOTD(b,prog){const GX=32,GY=21,P=[];for(let gy=0;gy<GY;gy++)for(let gx=0;gx<GX;gx++)P.push([b.n-(gy*2+1)*b.dLa,b.w+(gx*2+1)*b.dLo]);
+ let lastErr;
+ for(const ds of['mapzen','srtm30m','aster30m']){try{const out=new Float32Array(P.length);
+  for(let i=0;i<P.length;i+=100){if(i)await sleep(1150);prog&&prog(i/100+1,Math.ceil(P.length/100));
+   const q=P.slice(i,i+100).map(p=>p[0].toFixed(5)+','+p[1].toFixed(5)).join('|');let j,tries=0;
+   for(;;){const r=await fetch(`https://api.opentopodata.org/v1/${ds}?locations=${q}&interpolation=bilinear`,{signal:AbortSignal.timeout(20000)});if(r.status===429&&tries++<2){await sleep(2500);continue}if(!r.ok)throw new Error('HTTP '+r.status);j=await r.json();break}
+   if(j.status!=='OK')throw new Error(j.error||'bad status');j.results.forEach((x,k)=>{out[i+k]=x.elevation==null?0:x.elevation})}
+  return{ds,GX,GY,out}}catch(e){lastErr=e}}
+ throw lastErr}
+/* Primary elevation source: free Terrarium elevation tiles (AWS Open Data, CORS-enabled, no API key, no rate limit).
+   Falls back to OpenTopoData if the tiles can't be reached. */
+async function getElevTiles(b,prog){let z=Math.abs(b.n)>70||Math.abs(b.s)>70?8:11,x0,x1,y0,y1,nx,ny,n;
+ for(;;){n=2**z;x0=Math.floor(lon2x(b.w,z));x1=Math.floor(lon2x(b.e,z));y0=Math.max(0,Math.floor(lat2y(b.n,z)));y1=Math.min(n-1,Math.floor(lat2y(b.s,z)));nx=x1-x0+1;ny=y1-y0+1;if(nx*ny<=36||z<=6)break;z--}
+ const jobs=[];for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const p=`terrarium/${z}/${((x%n)+n)%n}/${y}.png`;jobs.push({x,y,u:`https://s3.amazonaws.com/elevation-tiles-prod/${p}`,u2:`https://elevation-tiles-prod.s3.amazonaws.com/${p}`})}
+ let done=0;prog&&prog(0,jobs.length);
+ await Promise.all(jobs.map(async j=>{let im=await loadTile(j.u);if(!im)im=await loadTile(j.u2);if(im){try{const c=document.createElement('canvas');c.width=256;c.height=256;const cx=c.getContext('2d',{willReadFrequently:true});cx.drawImage(im,0,0);j.d=cx.getImageData(0,0,256,256).data}catch(e){}}done++;prog&&prog(done,jobs.length)}));
+ const ok=jobs.filter(j=>j.d).length;if(ok<jobs.length*.8)throw new Error('elevation tiles unavailable');
+ const at=(px,py)=>{const tx=Math.floor(px/256),ty=Math.floor(py/256);if(ty<y0||ty>y1||tx<x0||tx>x1)return NaN;const j=jobs[(ty-y0)*nx+(tx-x0)];if(!j||!j.d)return NaN;const o=(Math.min(255,Math.floor(py-ty*256))*256+Math.min(255,Math.floor(px-tx*256)))*4;return j.d[o]*256+j.d[o+1]+j.d[o+2]/256-32768};
+ /* Real measured heights, sampled every 250 m (4 per 1 km map cell) straight from the elevation tiles (~60-100 m source pixels, each sample is the mean of a 3x3 patch). The 1 km cell values are means of those samples; the highest sample is kept as the true peak. */
+ const HX=W*4,HY=H*4,dem=new Float32Array(HX*HY),sp=z>=11?1.5:1;let miss=0,pk={v:-1e9,x:0,y:0};
+ for(let j=0;j<HY;j++){const cy=lat2y(b.n-(j+.5)/4*b.dLa,z)*256;for(let i=0;i<HX;i++){const cx=lon2x(b.w+(i+.5)/4*b.dLo,z)*256;let sum=0,c=0;
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const v=at(cx+dx*sp,cy+dy*sp);if(v===v){sum+=v;c++}}
+  if(c){const v=sum/c;dem[j*HX+i]=v;if(v>pk.v){pk={v,x:i,y:j}}}else{dem[j*HX+i]=0;miss++}}}
+ if(miss>HX*HY*.2)throw new Error('elevation tiles incomplete');
+ const out=new Float32Array(W*H);for(let y=0;y<H;y++)for(let x=0;x<W;x++){let t=0;for(let q=0;q<4;q++)for(let r=0;r<4;r++)t+=dem[(y*4+q)*HX+x*4+r];out[y*W+x]=t/16}
+ return{ds:'terrarium',GX:W,GY:H,out,dem:{d:dem,hx:HX,hy:HY,peak:{v:Math.round(pk.v),x:pk.x,y:pk.y}}}}
+async function getElevOM(b,prog){const GX=32,GY=21,P=[];for(let gy=0;gy<GY;gy++)for(let gx=0;gx<GX;gx++)P.push([b.n-(gy*2+1)*b.dLa,b.w+(gx*2+1)*b.dLo]);
+ const out=new Float32Array(P.length);
+ for(let i=0;i<P.length;i+=100){prog&&prog(i/100+1,Math.ceil(P.length/100));const c=P.slice(i,i+100);
+  const r=await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${c.map(p=>p[0].toFixed(4)).join(',')}&longitude=${c.map(p=>p[1].toFixed(4)).join(',')}`,{signal:AbortSignal.timeout(20000)});
+  if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();if(!j.elevation||j.elevation.length!==c.length)throw new Error('bad elevation reply');
+  j.elevation.forEach((v,k)=>{out[i+k]=v==null?0:v})}
+ return{ds:'openmeteo',GX,GY,out}}
+/* Last-resort ESTIMATE of terrain (not measured heights): Esri World Hillshade tiles are real shaded relief of the real place.
+   The shading tells us the ground slope along the sun direction (azimuth 315°, altitude 45°), so we solve for the heights that
+   best explain it (least squares + a tiny smoothness term). The shape of the terrain is realistic; absolute heights are approximate. */
+function solveRelief(g,GX,GY,dc,lx,ly,lam,iters){const N=GX*GY,cl=(v,m)=>Math.max(0,Math.min(m-1,v)),ent=[];
+ for(let y=0;y<GY;y++)for(let x=0;x<GX;x++)ent.push([y*GX+cl(x+1,GX),lx/(2*dc)],[y*GX+cl(x-1,GX),-lx/(2*dc)],[cl(y+1,GY)*GX+x,ly/(2*dc)],[cl(y-1,GY)*GX+x,-ly/(2*dc)]);
+ const A=z=>{const r=new Float64Array(N);for(let i=0;i<N;i++){let t=0;for(let k=0;k<4;k++){const e=ent[i*4+k];t+=e[1]*z[e[0]]}r[i]=t}return r};
+ const At=v=>{const o=new Float64Array(N);for(let i=0;i<N;i++)for(let k=0;k<4;k++){const e=ent[i*4+k];o[e[0]]+=e[1]*v[i]}return o};
+ const Lp=z=>{const o=new Float64Array(N);for(let y=0;y<GY;y++)for(let x=0;x<GX;x++){const i=y*GX+x;let t=0;for(const j of[x>0?i-1:-1,x<GX-1?i+1:-1,y>0?i-GX:-1,y<GY-1?i+GX:-1])if(j>=0)t+=z[i]-z[j];o[i]=t}return o};
+ const M=z=>{const a=At(A(z)),l=Lp(z),o=new Float64Array(N);for(let i=0;i<N;i++)o[i]=a[i]+lam*l[i];return o};
+ const z=new Float64Array(N),r=At(g),p=Float64Array.from(r);let rs=r.reduce((a,v)=>a+v*v,0);
+ for(let it=0;it<iters&&rs>1e-30;it++){const Mp=M(p);let pm=0;for(let i=0;i<N;i++)pm+=p[i]*Mp[i];if(pm<=0)break;const al=rs/pm;for(let i=0;i<N;i++){z[i]+=al*p[i];r[i]-=al*Mp[i]}const rn=r.reduce((a,v)=>a+v*v,0),be=rn/rs;rs=rn;for(let i=0;i<N;i++)p[i]=r[i]+be*p[i]}
+ return z}
+async function getElevHill(b,prog){const GX=32,GY=21;let z=Math.abs(b.n)>70||Math.abs(b.s)>70?8:10,x0,x1,y0,y1,nx,ny,n;
+ for(;;){n=2**z;x0=Math.floor(lon2x(b.w,z));x1=Math.floor(lon2x(b.e,z));y0=Math.max(0,Math.floor(lat2y(b.n,z)));y1=Math.min(n-1,Math.floor(lat2y(b.s,z)));nx=x1-x0+1;ny=y1-y0+1;if(nx*ny<=36||z<=6)break;z--}
+ const jobs=[];for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)jobs.push({u:`https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/${z}/${y}/${((x%n)+n)%n}`});
+ let done=0;await Promise.all(jobs.map(async j=>{const im=await loadTile(j.u);if(im){try{const c=document.createElement('canvas');c.width=256;c.height=256;const cx=c.getContext('2d',{willReadFrequently:true});cx.drawImage(im,0,0);j.d=cx.getImageData(0,0,256,256).data}catch(e){}}prog&&prog(++done,jobs.length)}));
+ if(jobs.filter(j=>j.d).length<jobs.length*.8)throw new Error('hillshade tiles unavailable');
+ const at=(px,py)=>{const tx=Math.floor(px/256),ty=Math.floor(py/256);if(ty<y0||ty>y1||tx<x0||tx>x1)return NaN;const j=jobs[(ty-y0)*nx+(tx-x0)];if(!j||!j.d)return NaN;return j.d[(Math.min(255,Math.floor(py-ty*256))*256+Math.min(255,Math.floor(px-tx*256)))*4]/255};
+ const bx=[],by=[];for(let i=0;i<=GX;i++)bx.push(lon2x(b.w+i*2*b.dLo,z)*256);for(let i=0;i<=GY;i++)by.push(lat2y(b.n-i*2*b.dLa,z)*256);
+ const sh=new Float64Array(GX*GY),all=[];
+ for(let gy=0;gy<GY;gy++)for(let gx=0;gx<GX;gx++){let sum=0,c=0;for(let py=by[gy];py<by[gy+1];py+=3)for(let px=bx[gx];px<bx[gx+1];px+=3){const v=at(px,py);if(v===v){sum+=v;c++}}sh[gy*GX+gx]=c?sum/c:NaN;if(c)all.push(sh[gy*GX+gx])}
+ if(all.length<GX*GY*.8)throw new Error('hillshade incomplete');
+ all.sort((a,c)=>a-c);const med=all[all.length>>1],al=Math.PI/4,base=Math.abs(med-Math.sin(al))<.1?Math.sin(al):med;
+ const g=new Float64Array(GX*GY);for(let i=0;i<g.length;i++){const v=sh[i]===sh[i]?sh[i]:med;g[i]=Math.max(-1.5,Math.min(1.5,(base-v)/Math.cos(al)))}
+ const az=315*Math.PI/180,zz=solveRelief(g,GX,GY,2000,Math.sin(az),-Math.cos(az),3e-10,300),srt=Array.from(zz).sort((a,c)=>a-c),lo=srt[Math.floor(srt.length*.02)];
+ const out=new Float32Array(GX*GY);for(let i=0;i<out.length;i++)out[i]=Math.max(0,zz[i]-lo);
+ return{ds:'hillshade',GX,GY,out}}
+function demFromCells(out,GX,GY,f){f=f||4;const hx=GX*f,hy=GY*f,d=new Float32Array(hx*hy),cr=t=>[(-t*t*t+2*t*t-t)/2,(3*t*t*t-5*t*t+2)/2,(-3*t*t*t+4*t*t+t)/2,(t*t*t-t*t)/2],cl=(v,m)=>v<0?0:v>=m?m-1:v;let pk={v:-1e9,x:0,y:0};
+ /* Catmull-Rom (smooth, no flat spots at the cell centres), kept inside the range of the 4 nearest measured cells so it never invents a higher peak */
+ for(let j=0;j<hy;j++){const fy=(j+.5)/f-.5,y0=Math.floor(fy),wy=cr(fy-y0);
+  for(let i=0;i<hx;i++){const fx=(i+.5)/f-.5,x0=Math.floor(fx),wx=cr(fx-x0);let v=0;
+   for(let q=0;q<4;q++){const row=cl(y0-1+q,GY)*GX;let r=0;for(let k=0;k<4;k++)r+=wx[k]*out[row+cl(x0-1+k,GX)];v+=wy[q]*r}
+   const ya=cl(y0,GY)*GX,yb=cl(y0+1,GY)*GX,xa=cl(x0,GX),xb=cl(x0+1,GX),c1=out[ya+xa],c2=out[ya+xb],c3=out[yb+xa],c4=out[yb+xb],lo=Math.min(c1,c2,c3,c4),hi=Math.max(c1,c2,c3,c4);
+   v=v<lo?lo:v>hi?hi:v;d[j*hx+i]=v;if(v>pk.v)pk={v,x:i,y:j}}}
+ return{d,hx,hy,peak:{v:Math.round(pk.v),x:pk.x,y:pk.y}}}
+async function otdFetch(ds,pts,onCall){const out=new Float32Array(pts.length);let nulls=0;
+ for(let i=0;i<pts.length;i+=100){if(i)await sleep(1150);onCall&&onCall(i/100+1,Math.ceil(pts.length/100));
+  const q=pts.slice(i,i+100).map(p=>p[0].toFixed(5)+','+p[1].toFixed(5)).join('|');let j,tries=0;
+  for(;;){const r=await fetch(`https://api.opentopodata.org/v1/${ds}?locations=${q}&interpolation=bilinear`,{signal:AbortSignal.timeout(20000)});if(r.status===429&&tries++<2){await sleep(2500);continue}if(!r.ok)throw new Error('HTTP '+r.status);j=await r.json();break}
+  if(j.status!=='OK')throw new Error(j.error||'bad status');j.results.forEach((x,k)=>{if(x.elevation==null){nulls++;out[i+k]=0}else out[i+k]=x.elevation})}
+ return{out,nulls}}
+const otdSets=b=>{const la=(b.n+b.s)/2;return inUS(b)?['ned10m','srtm30m','aster30m','mapzen']:Math.abs(la)<59?['srtm30m','aster30m','mapzen']:['aster30m','mapzen']};
+/* Elevation from OpenTopoData (opentopodata.org): USGS NED 10 m in the US, NASA SRTM 30 m elsewhere, ASTER where SRTM stops. One measured height per 1 km cell; the 250 m surface used for drawing is a smooth interpolation of those. */
+async function getElevOTDo(b,prog){const P=[];for(let gy=0;gy<H;gy++)for(let gx=0;gx<W;gx++)P.push([b.n-(gy+.5)*b.dLa,b.w+(gx+.5)*b.dLo]);let le;
+ for(const ds of otdSets(b)){try{const{out,nulls}=await otdFetch(ds,P,(i,n)=>prog&&prog(i,n));if(nulls>P.length*.15)throw new Error(ds+' has no data here');return{ds,GX:W,GY:H,out,dem:demFromCells(out,W,H)}}catch(e){le=e}}throw le}
+/* Elevation outside the map (for the Topography layer when zoomed out): coarse 40x26 OpenTopoData grid over 5x5 maps */
+async function loadSurroundTopoOTD(b,tok){try{if(Math.abs(b.n)>68||Math.abs(b.s)>68)return;const sw=b.e-b.w,sh=b.n-b.s,B={w:b.w-2*sw,e:b.e+2*sw,n:b.n+2*sh,s:b.s-2*sh},GX=40,GY=26,key='gts2_'+((b.n+b.s)/2).toFixed(2)+'_'+((b.w+b.e)/2).toFixed(2);let out=null;
+ try{const c=JSON.parse(localStorage.getItem(key)||'null');if(c&&c.length===GX*GY)out=Float32Array.from(c)}catch(e){}
+ if(!out){const P=[];for(let gy=0;gy<GY;gy++)for(let gx=0;gx<GX;gx++)P.push([B.n-(gy+.5)/GY*(B.n-B.s),B.w+(gx+.5)/GX*(B.e-B.w)]);
+  const r=await otdFetch(Math.abs((b.n+b.s)/2)<59?'srtm30m':'aster30m',P);if(r.nulls>P.length*.25||tok!==realTok)return;out=r.out;try{localStorage.setItem(key,JSON.stringify(Array.from(out,v=>Math.round(v))))}catch(e){}}
+ const D=demFromCells(out,GX,GY,8),w=D.hx,h=D.hy,at=(i,j)=>D.d[Math.max(0,Math.min(h-1,j))*w+Math.max(0,Math.min(w-1,i))],cv2=document.createElement('canvas');cv2.width=w;cv2.height=h;const x=cv2.getContext('2d');
+ for(let j=0;j<h;j++)for(let i=0;i<w;i++){const m=at(i,j);if(m<=1)x.fillStyle='#4a86b8';else x.fillStyle=topoFill(m,Math.max(-.5,Math.min(.5,((at(i+1,j)-at(i-1,j))+(at(i,j+1)-at(i,j-1)))/2500*8)));x.fillRect(i,j,1,1)}
+ if(tok===realTok){surrTopo=cv2;draw()}}catch(e){}}
+const loadST=(b,t)=>OPEN?loadSurroundTopoOTD(b,t):loadSurroundTopo(b,t);
+let elevLog=[];
+async function getElev(b,prog){elevLog=[];const m=e=>String(e&&e.message||e).slice(0,50);
+ if(OPEN){try{return await getElevOTDo(b,prog)}catch(e){elevLog.push('OpenTopoData: '+m(e))}throw new Error(elevLog.join('; '))}
+ try{return await getElevTiles(b,(i,n)=>prog&&prog(i,n))}catch(e){elevLog.push('tiles: '+m(e))}
+ try{return await getElevOM(b,prog)}catch(e){elevLog.push('Open-Meteo: '+m(e))}
+ try{return await Promise.race([getElevOTD(b,prog),new Promise((_,rj)=>setTimeout(()=>rj(new Error('too slow')),30000))])}catch(e){elevLog.push('OpenTopoData: '+m(e))}
+ try{return await getElevHill(b,prog)}catch(e){elevLog.push('hillshade: '+m(e))}
+ throw new Error(elevLog.join('; '))}
+function elevCells(E){const el=new Float32Array(N),o=E.out;for(let y=0;y<H;y++)for(let x=0;x<W;x++){const gx=Math.max(0,Math.min(E.GX-1,(x+.5)*E.GX/W-.5)),gy=Math.max(0,Math.min(E.GY-1,(y+.5)*E.GY/H-.5)),x0=Math.floor(gx),y0=Math.floor(gy),x1=Math.min(E.GX-1,x0+1),y1=Math.min(E.GY-1,y0+1),fx=gx-x0,fy=gy-y0;
+ el[y*W+x]=(o[y0*E.GX+x0]*(1-fx)+o[y0*E.GX+x1]*fx)*(1-fy)+(o[y1*E.GX+x0]*(1-fx)+o[y1*E.GX+x1]*fx)*fy}return el}
+const loadTile=u=>new Promise(res=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>res(im);im.onerror=()=>res(null);im.src=u});
+/* Real satellite view of the surrounding area (5x the map's width and height), shown outside the map when zoomed out */
+let demG=null,topoComp=null,surr=null,surrHab=null,surrTopo=null,surrTime=null,topoOn=false,nbr={},nbrT={},nbrR={},nbrOn=false;
+/* Real elevation of the surrounding 5x5 area, coloured like the Topography layer */
+async function loadSurroundTopo(b,tok){try{if(Math.abs(b.n)>68||Math.abs(b.s)>68)return;const sw=b.e-b.w,sh=b.n-b.s,B={w:b.w-2*sw,e:b.e+2*sw,n:b.n+2*sh,s:b.s-2*sh},w=320,h=210;
+ const T4=zz=>[Math.floor(lon2x(B.w,zz)),Math.floor(lon2x(B.e,zz)),Math.floor(lat2y(B.n,zz)),Math.floor(lat2y(B.s,zz))];
+ let z=9,[x0,x1,y0,y1]=T4(z);while((x1-x0+1)*(y1-y0+1)>64&&z>4){z--;[x0,x1,y0,y1]=T4(z)}
+ const n=2**z,nx=x1-x0+1,ny=y1-y0+1,jobs=[];for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)jobs.push(y<0||y>=n?null:loadTile(`https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${z}/${((x%n)+n)%n}/${y}.png`));
+ const ims=await Promise.all(jobs);if(tok!==realTok||ims.filter(Boolean).length<ims.length*.7)return;
+ const data=ims.map(im=>{if(!im)return null;const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0);return x.getImageData(0,0,256,256).data});
+ const M=new Float32Array(w*h);
+ for(let j=0;j<h;j++){const gy=lat2y(B.n-(j+.5)/h*(B.n-B.s),z)*256;for(let i=0;i<w;i++){const gx=lon2x(B.w+(i+.5)/w*(B.e-B.w),z)*256,tx=Math.floor(gx/256)-x0,ty=Math.floor(gy/256)-y0,d=data[ty*nx+tx];
+  if(!d){M[j*w+i]=NaN;continue}const o=(Math.min(255,Math.floor(gy%256))*256+Math.min(255,Math.floor(gx%256)))*4;M[j*w+i]=d[o]*256+d[o+1]+d[o+2]/256-32768}}
+ const cv2=document.createElement('canvas');cv2.width=w;cv2.height=h;const x=cv2.getContext('2d'),at=(i,j)=>{const v=M[Math.max(0,Math.min(h-1,j))*w+Math.max(0,Math.min(w-1,i))];return v===v?v:0};
+ for(let j=0;j<h;j++)for(let i=0;i<w;i++){const m=at(i,j);if(m<=1){x.fillStyle='#4a86b8'}else{const t=Math.min(1,Math.max(0,Math.floor(m/100)/10)),l=Math.max(-.5,Math.min(.5,((at(i+1,j)-at(i-1,j))+(at(i,j+1)-at(i,j-1)))/2500*8));x.fillStyle=`hsl(${110-t*85},45%,${Math.round(62-t*28+l*30)}%)`}x.fillRect(i,j,1,1)}
+ if(tok===realTok){surrTopo=cv2;draw()}}catch(e){}}
+function timeFromSurr(c){try{const w=320,h=210,k=document.createElement('canvas');k.width=w;k.height=h;const x=k.getContext('2d',{willReadFrequently:true});x.drawImage(c,0,0,w,h);const d=x.getImageData(0,0,w,h).data,cls=new Uint8Array(w*h);
+ for(let i=0;i<w*h;i++){const r=d[i*4],g=d[i*4+1],bl=d[i*4+2],mx=Math.max(r,g,bl),mn=Math.min(r,g,bl),lum=.299*r+.587*g+.114*bl,sat=mx?(mx-mn)/mx:0;let q;
+  if((bl>r+10&&bl>g-8&&lum<150)||(lum<40&&bl>=r-2))q=1;else if(lum>212&&sat<.14)q=9;else if(g>=r-2&&g>=bl&&sat>.1)q=lum<95?2:5;else if(sat<.11&&lum>=95&&lum<=195)q=7;else if(r>=g&&g>=bl&&lum>=105)q=11;else q=lum<75?2:11;cls[i]=q}
+ return colorize({cls,Pw:w,Ph:h})}catch(e){return null}}
+function habFromSurr(c){try{const w=320,h=210,k=document.createElement('canvas');k.width=w;k.height=h;const x=k.getContext('2d',{willReadFrequently:true});x.drawImage(c,0,0,w,h);const d=x.getImageData(0,0,w,h),o=x.createImageData(w,h);
+ for(let i=0;i<w*h;i++){const r=d.data[i*4],g=d.data[i*4+1],bl=d.data[i*4+2],mx=Math.max(r,g,bl),mn=Math.min(r,g,bl),lum=.299*r+.587*g+.114*bl,sat=mx?(mx-mn)/mx:0;let q;
+  if((bl>r+10&&bl>g-8&&lum<150)||(lum<40&&bl>=r-2))q=1;else if(lum>212&&sat<.14)q=9;else if(g>=r-2&&g>=bl&&sat>.1)q=lum<95?2:5;else if(sat<.11&&lum>=95&&lum<=195)q=7;else if(r>=g&&g>=bl&&lum>=105)q=11;else q=lum<75?2:11;
+  const t=IOT[q]!==undefined?IOT[q]:4,col=T[t].c;o.data[i*4]=parseInt(col.slice(1,3),16);o.data[i*4+1]=parseInt(col.slice(3,5),16);o.data[i*4+2]=parseInt(col.slice(5,7),16);o.data[i*4+3]=255}
+ x.putImageData(o,0,0);return k}catch(e){return null}}
+/* The 8 neighbouring map-sized areas, loaded with the same real land cover as the main map and drawn in the same habitat colours */
+async function loadNeighbors(b,tok){const sw=b.e-b.w,sh=b.n-b.s;
+ const OUT=[];for(let i=-2;i<=2;i++)for(let j=-2;j<=2;j++)if(Math.max(Math.abs(i),Math.abs(j))===2)OUT.push([i,j]);
+ const Q=[[0,-1],[1,0],[0,1],[-1,0],[1,-1],[1,1],[-1,1],[-1,-1]].concat(OUT);
+ /* 4 areas download at once, nearest first; each one is wiped in row by row (see revDraw) instead of popping in */
+ const one=async([i,j])=>{if(tok!==realTok)return;
+  try{const b2={w:b.w+i*sw,e:b.e+i*sw,n:b.n-j*sh,s:b.s-j*sh,dLo:b.dLo,dLa:b.dLa};if(Math.abs(b2.n)>85||Math.abs(b2.s)>85)return;
+   const lc2=await getLC(b2);if(tok!==realTok)return;const t=cellsFromLC(lc2);
+   const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+   for(let q=0;q<N;q++){if(t[q]<0)continue;x.fillStyle=T[t[q]].c;x.fillRect(q%W,(q/W)|0,1,1)}
+   const k=i+','+j;nbr[k]=smoothUp(c,6);nbrT[k]=colorize(lc2);nbrR[k]=performance.now();rq()}catch(e){}};
+ const work=async()=>{while(Q.length&&tok===realTok)await one(Q.shift())};
+ await Promise.all([work(),work(),work(),work()])}
+function revDraw(img,key,x,y,w,h){const t0=nbrR[key];let p=t0===undefined?1:Math.min(1,(performance.now()-t0)/1100);if(p<1)rq();p=1-(1-p)*(1-p);const sh=img.height*p;if(sh<1)return;G.drawImage(img,0,0,img.width,sh,x,y,w,h*p)}
+async function loadSurround(b,tok){try{if(Math.abs(b.n)>68||Math.abs(b.s)>68||!imgSel)return;const sv=imgSel;const sw=b.e-b.w,sh=b.n-b.s,B={w:b.w-2*sw,e:b.e+2*sw,n:b.n+2*sh,s:b.s-2*sh};
+ const T=zz=>[Math.floor(lon2x(B.w,zz)),Math.floor(lon2x(B.e,zz)),Math.floor(lat2y(B.n,zz)),Math.floor(lat2y(B.s,zz))];
+ let z=Math.min(9,sv.max),[x0,x1,y0,y1]=T(z);while((x1-x0+1)*(y1-y0+1)>64&&z>4){z--;[x0,x1,y0,y1]=T(z)}
+ const n=2**z,nx=x1-x0+1,ny=y1-y0+1,jobs=[];for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)jobs.push(y<0||y>=n?null:loadTile(sv.url(z,y,((x%n)+n)%n)));
+ const ims=await Promise.all(jobs);if(tok!==realTok||ims.filter(Boolean).length<ims.length*.5)return;
+ const m=document.createElement('canvas');m.width=nx*256;m.height=ny*256;const mx=m.getContext('2d');ims.forEach((im,i)=>{if(im)mx.drawImage(im,(i%nx)*256,Math.floor(i/nx)*256)});
+ const c=document.createElement('canvas');c.width=1920;c.height=1260;c.getContext('2d').drawImage(m,(lon2x(B.w,z)-x0)*256,(lat2y(B.n,z)-y0)*256,(lon2x(B.e,z)-lon2x(B.w,z))*256,(lat2y(B.s,z)-lat2y(B.n,z))*256,0,0,1920,1260);
+ if(tok===realTok){surr=c;surrHab=habFromSurr(c);if(surrHab)surrHab=smoothUp(surrHab,4);surrTime=timeFromSurr(c);draw()}}catch(e){}}
+async function getImagery(b){let le;for(const sv of await imgSources(b)){try{
+  let z=Math.min(sv.max,inUS(b)||!OPEN?12:11),n,x0,x1,y0,y1,nx,ny;if(Math.abs(b.n)>70||Math.abs(b.s)>70)z=Math.min(z,10);
+  for(;;){n=2**z;x0=Math.floor(lon2x(b.w,z));x1=Math.floor(lon2x(b.e,z));y0=Math.max(0,Math.floor(lat2y(b.n,z)));y1=Math.min(n-1,Math.floor(lat2y(b.s,z)));nx=x1-x0+1;ny=y1-y0+1;if(nx*ny<=80||z<=3)break;z--}
+  const jobs=[];for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)jobs.push(loadTile(sv.url(z,y,((x%n)+n)%n)));
+  const ims=await Promise.all(jobs);if(ims.filter(Boolean).length<ims.length*.6)throw new Error(sv.name+' tiles unavailable');
+  const m=document.createElement('canvas');m.width=nx*256;m.height=ny*256;const mx=m.getContext('2d');ims.forEach((im,i)=>{if(im)mx.drawImage(im,(i%nx)*256,Math.floor(i/nx)*256)});
+  const o=document.createElement('canvas');o.width=768;o.height=504;o.getContext('2d').drawImage(m,(lon2x(b.w,z)-x0)*256,(lat2y(b.n,z)-y0)*256,(lon2x(b.e,z)-lon2x(b.w,z))*256,(lat2y(b.s,z)-lat2y(b.n,z))*256,0,0,768,504);
+  imgSel=sv;srcUsed.img=sv.name;return o}catch(e){le=e}}throw le||new Error('no imagery source')}
+function cellsCanvas(){const c=document.createElement('canvas');c.width=768;c.height=504;const x=c.getContext('2d');for(let i=0;i<N;i++){x.fillStyle=T[type[i]].c;x.fillRect((i%W)*CS,((i/W)|0)*CS,CS,CS)}return c}
+function setTimeUI(){const r=$('tyr');if(realOK){r.min=ryMin;r.max=ryMax;tyear=ryMax;r.value=ryMax;$('tyl').textContent=ryMax;$('tpl').title='Play real land cover, year by year'}else{r.min=0;r.max=30;tyear=0;r.value=0;$('tyl').textContent='Year 0'}}
+function retryElev(){if(geo)realLoad(geo.lat,geo.lon)}
+const rkey=(la,lo)=>'gt3'+(OPEN?'o':'a')+'_'+la.toFixed(2)+'_'+lo.toFixed(2);
+async function realLoad(lat,lon){const tok=++realTok,b=bboxOf(lat,lon);realOK=false;realFailed=false;demG=null;topoComp=null;imgSel=null;srcUsed.lc='';srcUsed.el='';srcUsed.img='';surr=null;surrHab=null;surrTopo=null;surrTime=null;topoOn=false;nbr={};nbrT={};nbrR={};nbrOn=false;$('ls').disabled=false;rstat('⏳ Loading real data for this place: land cover…','#8a6d00');
+ try{
+  let t=null,el=null,ds='',lc=null,cache=null;
+  try{cache=JSON.parse(localStorage.getItem(rkey(lat,lon))||'null')}catch(e){}
+  if(cache&&cache.c===cyc()&&cache.t&&cache.t.length===N){t=Uint8Array.from(cache.t);if(cache.e&&cache.e.length===N){el=Float32Array.from(cache.e);ds=cache.d||'';elevDS=ds;if(cache.lcs&&!srcUsed.lc)srcUsed.lc=cache.lcs;if(cache.yr){ryMin=cache.yr[0];ryMax=cache.yr[1]}if(cache.dm&&cache.dm.length===W*4*H*4&&cache.pk)demG={d:Float32Array.from(cache.dm),hx:W*4,hy:H*4,peak:cache.pk}}}
+  let lcErr=null,lcEst=false,elevErr='';elevLog=[];if(!t){try{lc=await getLC(b)}catch(e){lc=null;lcErr=e}if(tok!==realTok)return;if(lc){t=cellsFromLC(lc);if(lc.yr){ryMin=lc.yr[0];ryMax=lc.yr[1]}}}
+  if(!el){rstat('⏳ Loading real data for this place: elevation…','#8a6d00');
+   try{const E=await getElev(b,(i,n)=>rstat('⏳ Loading real data for this place: elevation '+i+'/'+n+' (tiles or points)…','#8a6d00'));if(tok!==realTok)return;el=elevCells(E);ds=E.ds;elevDS=ds;demG=E.dem||null}catch(e){el=null;elevErr=String(e&&e.message||e)}}
+  rstat('⏳ Loading real data for this place: satellite imagery…','#8a6d00');
+  let im=null;try{im=await getImagery(b)}catch(e){im=null}
+  if(tok!==realTok)return;
+  if(!t){if(!im)throw lcErr||new Error('land cover and imagery both unavailable');lc=lcFromImagery(im,b);t=cellsFromLC(lc);lcEst=true}
+  if(!im&&!lc){try{lc=await getLC(b)}catch(e){}}
+  type=t;elev=new Float32Array(N);for(let i=0;i<N;i++)elev[i]=t[i]===0?.3:.38+(el?Math.max(0,el[i]):0)/2500;rf=1;buildTopoHi();
+  SP.forEach(s=>{s.m=new Uint8Array(N);for(let i=0;i<N;i++)if(s.hab.includes(type[i]))s.m[i]=1;s.mesh0=lab(s.m).sizes.reduce((a,c)=>a+c*c,0)});
+  rich=new Uint8Array(N);SP.forEach(s=>{for(let i=0;i<N;i++)rich[i]+=s.m[i]});
+  cpath=null;peakI=null;rivers=[];pts=[];cr=[];tn=[];hist=[];syncU();resetViews();build();
+  rbox=b;rYears={};rStats={};realImg=im||(lc?colorize(lc):cellsCanvas());
+  try{const c=document.createElement('canvas');c.width=SW;c.height=SH;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(realImg,0,0,SW,SH);satBase={d:new Uint8ClampedArray(x.getImageData(0,0,SW,SH).data),ty:new Uint8Array(SW*SH)}}catch(e){satBase=null}
+  if(lc&&!lcEst){rYears[ryMax]=null;}
+  realOK=true;lastReal=new Date();$('ls').disabled=true;setTimeUI();loadSurround(b,tok);if(!nbrOn){nbrOn=true;loadNeighbors(b,tok)}if(!topoOn){topoOn=true;loadST(b,tok)}{const L=$('loc');if(L)L.innerHTML=L.innerHTML.replace(/are loading[^.]*\./,'loaded.')}
+  try{if(!lcEst)localStorage.setItem(rkey(lat,lon),JSON.stringify({c:cyc(),t:Array.from(t),e:el?Array.from(el,v=>Math.round(v)):null,d:ds,yr:[ryMin,ryMax],lcs:srcUsed.lc,dm:demG?Array.from(demG.d,v=>Math.round(v)):null,pk:demG?demG.peak:null}))}catch(e){}
+  rstat((lcEst?'● REAL DATA (partly estimated): real satellite imagery and elevation; <u>land cover ESTIMATED from imagery colours because the land cover service could not be reached ('+String(lcErr&&lcErr.message||'unknown').slice(0,60)+')</u>':'● REAL DATA: land cover from '+(srcUsed.lc||'cache'))+(el?'; elevation: '+(DSN[ds]||'OpenTopoData')+(elevLog.length?' <small>(earlier sources failed: '+elevLog.join('; ').replace(/</g,'&lt;')+')</small>':''):'; <u>elevation could not be loaded, so the ground is shown flat</u> <small>('+(elevErr||'no reason given').replace(/</g,'&lt;')+')</small> <a href="#" onclick="retryElev();return false" style="color:inherit;font-weight:700">Retry elevation</a>')+(im?'; imagery from '+srcUsed.img:'; imagery unavailable, showing land cover colours')+'.','#1d6b3a');
+  update();loadYear(ryMin);loadYear(ryMax);rq();
+ }catch(e){if(tok!==realTok)return;realOK=false;realFailed=true;setTimeUI();draw();rstat('● SIMULATED: real data could not be loaded ('+String(e&&e.message||e).slice(0,160)+'). The map below is a made-up landscape, not the real place. Real data needs a normal browser with internet access. <a href="#" onclick="retryElev();return false" style="color:inherit;font-weight:700">Retry</a>','#a33a1d')}}
+async function loadYear(y){if(!rbox||rYears[y]||rYears['p'+y])return;rYears['p'+y]=1;const bx=rbox;try{const lc=await getLC(bx,y);if(bx!==rbox)return;rYears[y]=colorize(lc);rStats[y]=lcStats(lc)}catch(e){rYears[y]=false}rq()}
+function realTimeCanvas(){const c=rYears[tyear];if(c)return c;loadYear(tyear);return realImg||satCanvas()}
+async function goTo(q){q=q.trim().replace(/"/g,'');if(!q)return;const Lc=$('loc'),m=q.match(/^(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)$/);
+ if(m){const la=+m[1],lo=+m[2];if(Math.abs(la)>90||Math.abs(lo)>180){Lc.textContent='Latitude must be -90 to 90 and longitude -180 to 180.';return}
+  applyPlace({lat:la,lon:lo,relief:.3,mix:heur(la)});Lc.textContent='📍 '+la.toFixed(2)+'°, '+lo.toFixed(2)+'°. Default species used. Real land cover, elevation and imagery are loading (see the status line above).';return}
+ const gz=gazFind(q);
+ if(gz){Lc.textContent='Loading '+gz.n+'…';let species=[];try{species=await Promise.race([gbifSpecies(gz.la,gz.lo),new Promise((_,r)=>setTimeout(r,6000))])}catch(x){}
+  applyPlace({name:gz.n,lat:gz.la,lon:gz.lo,relief:gz.rl,mix:heur(gz.la),species});
+  Lc.textContent='📍 '+gz.n+' ('+gz.la.toFixed(2)+'°, '+gz.lo.toFixed(2)+'°). Found in the built-in place list, so it works without internet'+(species.length>=4?'; species from GBIF records near here':'; default species used because GBIF could not be reached')+'. Real land cover, elevation and imagery are loading (see the status line above).';return}
+ Lc.textContent='Looking up '+q+'…';
+ try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(q),{signal:AbortSignal.timeout(8000)});if(!r.ok)throw 0;const j=await r.json();
+  if(!j.length){Lc.textContent='Couldn’t find “'+q+'”. Try a more specific name.';return}
+  const la=+j[0].lat,lo=+j[0].lon,name=String(j[0].display_name||q).split(',').slice(0,2).join(',');let species=[];
+  try{species=await gbifSpecies(la,lo)}catch(x){}
+  applyPlace({name,lat:la,lon:lo,relief:.3,mix:heur(la),species});
+  Lc.textContent='📍 '+cl(name)+' ('+la.toFixed(2)+'°, '+lo.toFixed(2)+'°). Place from OpenStreetMap'+(species.length>=4?'; species from GBIF records near here':'; GBIF species unavailable, default species used')+'. Real land cover, elevation and imagery are loading (see the status line above).'}
+ catch(x){Lc.textContent='Couldn’t reach the online place search (it may be blocked in this view), and “'+q+'” isn’t in the built-in list. Pick a name from the suggestions as you type, or enter coordinates like 37.77, -122.42.'}}
+async function gbifSpecies(la,lo){const d=.4,g=`POLYGON((${lo-d} ${la-d},${lo+d} ${la-d},${lo+d} ${la+d},${lo-d} ${la+d},${lo-d} ${la-d}))`,
+ j=await(await fetch('https://api.gbif.org/v1/occurrence/search?taxonKey=359&hasCoordinate=true&limit=0&facet=speciesKey&facetLimit=8&geometry='+encodeURIComponent(g))).json(),
+ keys=((j.facets&&j.facets[0]&&j.facets[0].counts)||[]).map(c=>c.name);
+ return await Promise.all(keys.map(async k=>{const s=await(await fetch('https://api.gbif.org/v1/species/'+k)).json();return{name:s.vernacularName||s.canonicalName||s.species,scientific:s.canonicalName||s.species,status:s.iucnRedListCategory||'LC',habitats:['forest','grassland','scrub'],sensitivity:.7}}))}
+PLACES.slice(0,6).forEach(n=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{$('q').value=n;goTo(n)};$('chips').appendChild(b)});
+$('qgo').onclick=()=>goTo($('q').value);$('q').onkeydown=e=>{if(e.key==='Enter')goTo(e.target.value)};$('rnd').onclick=()=>{const n=PLACES[Math.floor(Math.random()*PLACES.length)];$('q').value=n;goTo(n)};
+function topoDesc(){const d=$('topoDesc');
+ let mn=1e9,mx=0,sum=0,steep=0,n=0,hi=0;for(let i=0;i<N;i++){if(!type[i])continue;const e=elevM(i),g=gr(i);n++;sum+=g;if(g>10)steep++;if(e<mn)mn=e;if(e>mx){mx=e;hi=i}}
+ d.style.display='';if(!n){d.textContent='Topography: this area is almost entirely open water, so there is no land relief to show.';return}
+ const ft=m=>Math.round(m*3.281).toLocaleString(),range=mx-mn,cls=range<150?'flat':range<500?'gently rolling':range<1200?'hilly':'mountainous',h=(hi%W)/W,v=((hi/W)|0)/H,ns=v<.33?'north':v>.67?'south':'',ew=h<.33?'west':h>.67?'east':'',where=ns&&ew?ns+'-'+ew:(ns||ew||'center');
+ let t=`<b>About this terrain.</b> The ~${units==='metric'?'64 × 42 km':'40 × 26 mile'} area is <b>${cls}</b>. Land elevation runs from ${fmtE(mn)} to ${fmtE(mx)}, and the highest ground is toward the ${where}. Average slope is about ${Math.round(sum/n)}%, and ${Math.round(steep/n*100)}% of the land is steeper than 10%.`;
+ if(rd){t+=` <b>Your road:</b> steepest grade ${maxGrade()}% and erosion risk ${Math.round(erosion($('buf').checked)*100)}%.`}else t+=' Draw a road to see its grade.';
+ const cn={};for(let i=0;i<N;i++)if(type[i]){const f=landform(i);cn[f]=(cn[f]||0)+1}const lf=Object.entries(cn).sort((a,b)=>b[1]-a[1]).map(([k,v])=>Math.round(v/n*100)+'% '+k.toLowerCase()).join(', ');
+ t+=` <b>Landforms:</b> ${lf}.`;d.innerHTML=t}
+const topoFill=(m,l)=>{const t=Math.min(1,Math.max(0,Math.floor(m/100)/10));return `hsl(${110-t*85},45%,${Math.round(62-t*28+l*30)}%)`};
+/* Topography layer from the real 250 m height grid: same colour ramp and relief shading as the surrounding area, water from the land-cover map. */
+function buildTopoHi(){topoComp=null;if(!demG)return;try{const{d,hx,hy}=demG,c=document.createElement('canvas');c.width=hx;c.height=hy;const x=c.getContext('2d'),at=(i,j)=>d[Math.max(0,Math.min(hy-1,j))*hx+Math.max(0,Math.min(hx-1,i))];
+ for(let j=0;j<hy;j++)for(let i=0;i<hx;i++){const m=at(i,j);if(m<=1)x.fillStyle='#4a86b8';else{const l=Math.max(-.5,Math.min(.5,((at(i+1,j)-at(i-1,j))+(at(i,j+1)-at(i,j-1)))*.0128));x.fillStyle=topoFill(m,l)}x.fillRect(i,j,1,1)}
+ const wm=document.createElement('canvas');wm.width=W;wm.height=H;const wx2=wm.getContext('2d');wx2.fillStyle='#4a86b8';for(let i=0;i<N;i++)if(type[i]===0)wx2.fillRect(i%W,(i/W)|0,1,1);
+ const o=document.createElement('canvas');o.width=768;o.height=504;const ox2=o.getContext('2d');ox2.imageSmoothingEnabled=true;ox2.imageSmoothingQuality='high';ox2.drawImage(c,0,0,768,504);ox2.drawImage(smoothUp(wm,6),0,0,768,504);topoComp=o}catch(e){topoComp=null}}
+function buildContoursDem(){const{d,hx,hy}=demG,s2=new Float32Array(hx*hy);let mx=0;
+ for(let j=0;j<hy;j++)for(let i=0;i<hx;i++){let t=0,c=0;for(let dj=-1;dj<=1;dj++)for(let di=-1;di<=1;di++){const jj=j+dj,ii=i+di;if(jj>=0&&jj<hy&&ii>=0&&ii<hx){t+=d[jj*hx+ii];c++}}const v=t/c;s2[j*hx+i]=v;if(v>mx)mx=v}
+ const P1=new Path2D(),P5=new Path2D(),k=W*CS/hx;
+ for(let Lm=100;Lm<=mx;Lm+=100){const t=Lm,P=Lm%500===0?P5:P1;
+  for(let y=0;y<hy-1;y++)for(let x=0;x<hx-1;x++){const i=y*hx+x,a=s2[i],b=s2[i+1],c=s2[i+hx+1],e=s2[i+hx],q=[];
+   if((a>=t)!==(b>=t))q.push([x+(t-a)/(b-a),y]);if((b>=t)!==(c>=t))q.push([x+1,y+(t-b)/(c-b)]);if((e>=t)!==(c>=t))q.push([x+(t-e)/(c-e),y+1]);if((a>=t)!==(e>=t))q.push([x,y+(t-a)/(e-a)]);
+   for(let m=0;m+1<q.length;m+=2){P.moveTo((q[m][0]+.5)*k,(q[m][1]+.5)*k);P.lineTo((q[m+1][0]+.5)*k,(q[m+1][1]+.5)*k)}}}
+ cpath=[P1,P5]}
+function buildContours(){if(demG&&realOK){buildContoursDem();return}const P1=new Path2D(),P5=new Path2D();let mxE=0;for(let i=0;i<N;i++)if(elev[i]>mxE)mxE=elev[i];const top=(mxE-.38)*2500*rf;
+ for(let Lm=100;Lm<=top;Lm+=100){const t=.38+Lm/(2500*rf),P=Lm%500===0?P5:P1;
+  for(let y=0;y<H-1;y++)for(let x=0;x<W-1;x++){const i=y*W+x,a=elev[i],b=elev[i+1],c=elev[i+W+1],d=elev[i+W],q=[];
+   if((a>=t)!==(b>=t))q.push([x+(t-a)/(b-a),y]);if((b>=t)!==(c>=t))q.push([x+1,y+(t-b)/(c-b)]);if((d>=t)!==(c>=t))q.push([x+(t-d)/(c-d),y+1]);if((a>=t)!==(d>=t))q.push([x,y+(t-a)/(d-a)]);
+   for(let k=0;k+1<q.length;k+=2){P.moveTo((q[k][0]+.5)*CS,(q[k][1]+.5)*CS);P.lineTo((q[k+1][0]+.5)*CS,(q[k+1][1]+.5)*CS)}}}
+ cpath=[P1,P5]}
+function makeRivers(){rivers=[];const r=mb(seedN*17),st=[];for(let k=0;k<600&&st.length<6;k++){const i=Math.floor(r()*N);if(type[i]&&elev[i]>.52&&st.every(s=>Math.hypot(s%W-i%W,((s/W)|0)-((i/W)|0))>10))st.push(i)}
+ for(const s0 of st){let i=s0;const path=[],seen=new Set();for(let n=0;n<250;n++){path.push(i);seen.add(i);if(!type[i]&&n>0)break;let best=-1,bv=elev[i];const x=i%W,y=(i/W)|0;
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;const j=ny*W+nx;if(!seen.has(j)&&elev[j]<bv){bv=elev[j];best=j}}if(best<0)break;i=best}
+  if(path.length>8)rivers.push(path)}}
+const money=m=>m>=1000?'$'+(m/1000).toFixed(2)+'B':'$'+(m>=100?Math.round(m):m.toFixed(1))+'M';
+function costCalc(f,bf,nx){const wf=rw()<1?.8:rw()>1?1.39:1;let base=0,earth=0,bridge=0,land=0,tun=0,homes=0;
+ for(let k=1;k<samples.length;k++){const ds=Math.hypot(samples[k].x-samples[k-1].x,samples[k].y-samples[k-1].y);if(!ds)continue;if(inT(k)){tun+=ds*130;continue}
+  const c=sc(samples[k]),tp=type[c];if(tp===0){bridge+=ds*25;continue}const b=3.45*wf*ds;base+=b;earth+=b*Math.min(3,gr(c)/6)+(tp===1?b*.8:0);if(tp===5){land+=ds*12;homes+=ds*40}}
+ const len=sd[sd.length-1]||0,xs=nx*4.5,fb=(f?len*.07:0)+(bf?len*.5:0);
+ return{base,earth,bridge,land,tun,homes,xs,fb,tot:base+earth+bridge+land+tun+xs+fb}}
+function costHTML(){if(!rd)return '';const C=costCalc($('fence').checked,$('buf').checked,cr.length),{base,earth,bridge,land,tun,homes,xs,fb,tot}=C,
+  row=(n,v,t)=>v>.05?`<div style="display:flex;justify-content:space-between;gap:8px;font-size:12px"><span>${n} <span title="${t?'Based on a published figure. See Sources and data notes.':'My assumption. No published source.'}" style="opacity:.7">${t?'✓':'~'}</span></span><span>${money(v)}</span></div>`:'';
+ return `<div style="margin-top:8px;padding:8px;border:1px solid var(--bd);border-radius:8px"><b>Estimated build cost: ${money(tot)}</b> <span>(planning level, wide uncertainty, USD)</span>`+row('Road and paving',base,1)+row('Earthworks on slopes and wet ground',earth,0)+row('Bridges over water',bridge,0)+row('Land and demolition'+(homes>=1?' (~'+Math.round(homes)+' homes)':''),land,0)+row('Tunnels',tun,0)+row('Wildlife crossings',xs,1)+row('Fencing and buffer',fb,1)+`<div style="font-size:11px;margin-top:6px;opacity:.8">✓ based on published figures · ~ my assumption, no source. Figures come from different years and are not adjusted for inflation. See Sources and data notes at the bottom.</div></div>`}
+/* ===== Built-in Satellite-style, 3D terrain and Timelapse views =====
+   These are the simulated fallback views, used only when real data can't load. */
+const SS=6,SW=W*SS,SH=H*SS,SUB=2;
+let satBase=null,satCv=null,tCv=null,tImg=null,tyear=0,tplay=null,tdk='',tD=null,tK=null,tpk='',tP=null,tfk='',tNC=0,tNB=0,v3c=null,v3h=null,v3v=null,v3={yaw:.5,pitch:.95,s:1};
+const hsh=(x,y)=>{let h=Math.imul(x|0,374761393)+Math.imul(y|0,668265263)+Math.imul(seedN|0,1013);h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967296};
+const vn=(x,y)=>{const ix=Math.floor(x),iy=Math.floor(y),fx=x-ix,fy=y-iy,u=fx*fx*(3-2*fx),v=fy*fy*(3-2*fy);return(hsh(ix,iy)*(1-u)+hsh(ix+1,iy)*u)*(1-v)+(hsh(ix,iy+1)*(1-u)+hsh(ix+1,iy+1)*u)*v};
+const bil=(A,x,y)=>{x=Math.max(0,Math.min(W-1,x));y=Math.max(0,Math.min(H-1,y));const x0=Math.floor(x),y0=Math.floor(y),x1=Math.min(W-1,x0+1),y1=Math.min(H-1,y0+1),fx=x-x0,fy=y-y0;return(A[y0*W+x0]*(1-fx)+A[y0*W+x1]*fx)*(1-fy)+(A[y1*W+x0]*(1-fx)+A[y1*W+x1]*fx)*fy};
+const fa1=k=>units==='metric'?k.toFixed(1)+' km²':(k*.386).toFixed(1)+' mi²';
+function resetViews(){satBase=satCv=tCv=tImg=null;tdk=tpk=tfk='';tD=tK=tP=null;v3c=v3h=v3v=null}
+function satBuild(){
+ const shore=new Float32Array(N);
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){let l=0,c=0;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H)continue;c++;if(type[b*W+a])l++}shore[y*W+x]=l/c}
+ const d=new Uint8ClampedArray(SW*SH*4),ty=new Uint8Array(SW*SH);
+ for(let py=0;py<SH;py++)for(let px=0;px<SW;px++){
+  const u=(px+.5)/SS,v=(py+.5)/SS,wu=u+(vn(px*.09,py*.09)-.5)*.9,wv=v+(vn(px*.09+50,py*.09+50)-.5)*.9,
+   cx=Math.max(0,Math.min(W-1,Math.floor(wu))),cy=Math.max(0,Math.min(H-1,Math.floor(wv))),t=type[cy*W+cx],
+   n1=vn(px*.5,py*.5),n2=vn(px*1.7,py*1.7),n3=vn(px*.12,py*.12);
+  let r,g,b;
+  if(t===0){const s=Math.min(1,bil(shore,u-.5,v-.5)*2.4);r=12+s*40+n3*10;g=48+s*72+n3*14;b=78+s*62+n3*12}
+  else{
+   if(t===2){const f=.7+.5*n3+.35*(n2-.5);r=30*f;g=76*f;b=40*f}
+   else if(t===3){const f=.85+.4*n3+.2*(n2-.5);r=150*f+n3*14;g=160*f;b=84*f}
+   else if(t===4){const f=.85+.4*n3+.25*(n2-.5);r=152*f;g=130*f;b=92*f}
+   else if(t===1){if(n1>.62){r=48;g=88;b=108}else{const f=.85+.3*n3;r=66*f;g=104*f;b=84*f}}
+   else{const f=.9+.2*n2,l=(px%9===0||py%11===0)?.72:(n1>.7?.85:1);r=150*f*l;g=146*f*l;b=142*f*l}
+   const ex=bil(elev,u,v-.5)-bil(elev,u-1,v-.5),ey=bil(elev,u-.5,v)-bil(elev,u-.5,v-1);
+   if(t!==5){
+    const sh=1+Math.max(-.5,Math.min(.5,(ex+ey)*16))*.8;r*=sh;g*=sh;b*=sh;
+    const gm=Math.hypot(ex,ey)*2*125*rf,rk=Math.max(0,Math.min(1,(gm-9)/12))*.65,m=Math.max(0,bil(elev,u-.5,v-.5)-.38)*2500*rf,sn=Math.max(0,Math.min(1,(m-2300)/800))*(.55+.45*n1),rc=120*(.8+.4*n2);
+    r+=(rc-r)*rk;g+=(rc*.93-g)*rk;b+=(rc*.85-b)*rk;
+    r+=(242-r)*sn;g+=(245-g)*sn;b+=(248-b)*sn}}
+  const o=(py*SW+px)*4;d[o]=r;d[o+1]=g;d[o+2]=b;d[o+3]=255;ty[py*SW+px]=t}
+ satBase={d,ty}}
+const satGet=()=>{if(!satBase)satBuild();return satBase};
+function satCanvas(){if(realOK&&realImg)return realImg;if(!satCv){const sb=satGet();satCv=Object.assign(document.createElement('canvas'),{width:SW,height:SH});satCv.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(sb.d),SW,SH),0,0)}return satCv}
+function timeCanvas(){
+ const sb=satGet(),b=$('buf').checked,t=tyear;
+ if(!rd||!samples.length||t<2){tNC=tNB=0;return satCanvas()}
+ const dk=JSON.stringify(pts);
+ if(dk!==tdk){tdk=dk;tpk='';tD=new Float32Array(SW*SH);tK=new Int16Array(SW*SH);
+  for(let p=0;p<SW*SH;p++){if(sb.ty[p]===0){tD[p]=1e9;continue}const u=((p%SW)+.5)/SS,v=(((p/SW)|0)+.5)/SS;let m=1e9,mk=0;for(let k=0;k<samples.length;k++){const dx=u-samples[k].x,dy=v-samples[k].y,dd=dx*dx+dy*dy;if(dd<m){m=dd;mk=k}}tD[p]=Math.sqrt(m);tK[p]=mk}}
+ const pk=dk+'|'+JSON.stringify(cr)+'|'+JSON.stringify(tn);
+ if(pk!==tpk){tpk=pk;tP=new Uint8Array(SW*SH);
+  for(let p=0;p<SW*SH;p++){if(tD[p]>4)continue;if(inT(tK[p])){tP[p]=1;continue}const u=((p%SW)+.5)/SS,v=(((p/SW)|0)+.5)/SS;for(const c of cr)if(Math.hypot(u-c.x,v-c.y)<=CR){tP[p]=1;break}}}
+ const fk=pk+'|'+b+'|'+rw()+'|'+t;
+ if(fk===tfk&&tCv)return tCv;tfk=fk;
+ if(!tCv){tCv=Object.assign(document.createElement('canvas'),{width:SW,height:SH});tImg=new ImageData(SW,SH)}
+ const od=tImg.data;od.set(sb.d);
+ const Dm=dl(b),rwv=rw(),clearR=rwv*.6+(Dm-rwv*.6)*Math.min(1,(t-2)/18),sr=t>=6?Math.min(1,(t-6)/24)*1.9*(rwv>1?1.2:1):0;
+ let nc=0,nb=0;
+ for(let p=0;p<SW*SH;p++){const d=tD[p];if(d>=4||tP[p])continue;const ty=sb.ty[p];if(ty===0||ty===5)continue;
+  const px=p%SW,py=(p/SW)|0,o=p*4;
+  if(sr>0&&d<=sr*(.5+.8*vn(px*.07+9,py*.07+9))&&vn(px*.33,py*.33)>.45){const f=.85+.3*vn(px*1.3,py*1.3),l=(px%9===0||py%11===0)?.7:1;od[o]=150*f*l;od[o+1]=146*f*l;od[o+2]=142*f*l;nb++;continue}
+  const R=clearR*(.7+.6*vn(px*.15,py*.15));
+  if(d<=R){const a=.9-.45*d/(R+1e-6),f=.88+.24*vn(px*.6,py*.6);od[o]+=(166*f-od[o])*a;od[o+1]+=(138*f-od[o+1])*a;od[o+2]+=(102*f-od[o+2])*a;nc++}}
+ tNC=nc/(SS*SS);tNB=nb/(SS*SS);tCv.getContext('2d').putImageData(tImg,0,0);return tCv}
+function timeHUD(){
+ if(realOK){const y=tyear,s=rStats[y],s0=rStats[ryMin],dl_=(k)=>{if(!s0||y===ryMin)return '';const d=(s[k]||0)-(s0[k]||0);return ' ('+(d>=0?'+':'−')+fa1(Math.abs(d))+' since '+ryMin+')'};
+  $('tyl').textContent=y;$('tyr').value=y;
+  $('tst').innerHTML=!s?'Loading real land cover for '+y+'…':`<b>${y}</b>, real Sentinel-2 land cover for this area: built-up <b>${fa1(s[7]||0)}</b>${dl_(7)} · trees <b>${fa1(s[2]||0)}</b>${dl_(2)} · crops <b>${fa1(s[5]||0)}</b>${dl_(5)}. Colours: red built-up, green trees, yellow crops, tan rangeland, blue water.`;return}
+ const t=tyear;$('tyl').textContent='Year '+t;$('tyr').value=t;
+ $('tst').innerHTML=!rd?'Draw a road to see how the landscape changes over time.':t<2?'Year '+t+': before construction. The road opens in year 2.':`<b>Year ${t}:</b> cleared or degraded habitat <b>${fa1(tNC)}</b> · new built-up land <b>${fa1(tNB)}</b>. Clearing spreads out from the road for about 18 years, and homes begin to appear beside it after year 6.`+(cr.length||tn.length?' Green corridors at crossings and tunnels stay intact.':'')}
+function timeSrc(){const c=realOK?realTimeCanvas():timeCanvas();timeHUD();return c}
+function layerUI(){if((layer==='rich'||layer==='species')&&$('moreL').hidden){$('moreL').hidden=false;$('moreLb').textContent='Less ▴'}if((mode==='cross'||mode==='tunnel')&&$('moreT').hidden){$('moreT').hidden=false;$('moreTb').textContent='Less ▴'}const on=layer==='time';$('tlb').style.display=on?'':'none';$('tst').style.display=on?'':'none';if(!on&&tplay){clearInterval(tplay);tplay=null;$('tpl').textContent='▶ Play'}}
+function v3Build(){
+ const sb=satGet(),sw=W*SUB,sh=H*SUB,k=SS/SUB;
+ v3h=new Float32Array(N);for(let i=0;i<N;i++)v3h[i]=type[i]?elevM(i):0;
+ v3c=new Uint8Array(sw*sh*3);
+ for(let y=0;y<sh;y++)for(let x=0;x<sw;x++){let r=0,g=0,b=0;for(let a=0;a<k;a++)for(let c=0;c<k;c++){const p=((y*k+a)*SW+x*k+c)*4;r+=sb.d[p];g+=sb.d[p+1];b+=sb.d[p+2]}const q=(y*sw+x)*3,n=k*k;v3c[q]=r/n;v3c[q+1]=g/n;v3c[q+2]=b/n}
+ v3v=new Float32Array((sw+1)*(sh+1));for(let j=0;j<=sh;j++)for(let i=0;i<=sw;i++)v3v[j*(sw+1)+i]=bil(v3h,i/SUB-.5,j/SUB-.5)}
+function draw3d(){
+ if(!v3c)v3Build();
+ const g=G,sw=W*SUB,sh=H*SUB,cy_=Math.cos(v3.yaw),sy_=Math.sin(v3.yaw),sp=Math.sin(v3.pitch),cp=Math.cos(v3.pitch),sc=9*v3.s,hs=sc*2.5/1000*cp,cyc=262;
+ g.setTransform(1,0,0,1,0,0);const gr_=g.createLinearGradient(0,0,0,504);gr_.addColorStop(0,'#1d2b3a');gr_.addColorStop(1,'#27343a');g.fillStyle=gr_;g.fillRect(0,0,768,504);
+ const PX=new Float32Array((sw+1)*(sh+1)),PY=new Float32Array((sw+1)*(sh+1));
+ for(let j=0;j<=sh;j++)for(let i=0;i<=sw;i++){const q=j*(sw+1)+i,X=i/SUB-W/2,Y=j/SUB-H/2;PX[q]=384+(X*cy_-Y*sy_)*sc;PY[q]=cyc+(X*sy_+Y*cy_)*sc*sp-v3v[q]*hs}
+ const pj=(x,y,hm)=>{const X=x-W/2,Y=y-H/2;return[384+(X*cy_-Y*sy_)*sc,cyc+(X*sy_+Y*cy_)*sc*sp-hm*hs]},hm=(x,y)=>bil(v3h,x-.5,y-.5)+25;
+ const ops=new Map(),add=(x,y,o)=>{const q=Math.max(0,Math.min(sh-1,Math.floor(y*SUB)))*sw+Math.max(0,Math.min(sw-1,Math.floor(x*SUB)));let a=ops.get(q);if(!a)ops.set(q,a=[]);a.push(o)};
+ if(rd){for(let k=1;k<samples.length;k++){if(inT(k))continue;const a=samples[k-1],b=samples[k];add((a.x+b.x)/2,(a.y+b.y)/2,{t:0,a,b})}
+  tn.forEach(t=>{for(const e of[t.s,t.e]){const k=sd.findIndex(v=>v>=e),p=samples[k];if(p)add(p.x,p.y,{t:1,x:p.x,y:p.y})}});
+  cr.forEach(c=>add(c.x,c.y,{t:2,x:c.x,y:c.y}))}
+ const xa=sy_>=0,ya=cy_>=0,rwp=Math.max(2.5,rw()*sc*.75);
+ g.lineJoin='round';g.lineCap='round';g.lineWidth=.6;
+ for(let jj=0;jj<sh;jj++){const j=ya?jj:sh-1-jj;for(let ii=0;ii<sw;ii++){const i=xa?ii:sw-1-ii,q00=j*(sw+1)+i,q10=q00+1,q01=q00+sw+1,q11=q01+1,ci=(j*sw+i)*3,
+   ex=(v3v[q10]+v3v[q11]-v3v[q00]-v3v[q01])/2,ey=(v3v[q01]+v3v[q11]-v3v[q00]-v3v[q10])/2,l=1+Math.max(-.3,Math.min(.3,(ex+ey)/500*.5)),
+   col='rgb('+Math.min(255,v3c[ci]*l|0)+','+Math.min(255,v3c[ci+1]*l|0)+','+Math.min(255,v3c[ci+2]*l|0)+')';
+   g.fillStyle=col;g.strokeStyle=col;g.beginPath();g.moveTo(PX[q00],PY[q00]);g.lineTo(PX[q10],PY[q10]);g.lineTo(PX[q11],PY[q11]);g.lineTo(PX[q01],PY[q01]);g.closePath();g.fill();g.stroke();
+   const o=ops.get(j*sw+i);if(o)for(const e of o){
+    if(e.t===0){const A=pj(e.a.x,e.a.y,hm(e.a.x,e.a.y)),B=pj(e.b.x,e.b.y,hm(e.b.x,e.b.y));g.beginPath();g.moveTo(A[0],A[1]);g.lineTo(B[0],B[1]);g.strokeStyle='#2a2a2e';g.lineWidth=rwp+1;g.stroke();g.lineWidth=.6}
+    else if(e.t===1){const A=pj(e.x,e.y,hm(e.x,e.y));g.beginPath();g.arc(A[0],A[1],5,0,7);g.fillStyle='#7a5a32';g.fill();g.strokeStyle='#fff';g.lineWidth=1.5;g.stroke();g.lineWidth=.6}
+    else{const A=pj(e.x,e.y,hm(e.x,e.y));g.beginPath();g.ellipse(A[0],A[1],CR*sc*.55,CR*sc*.55*sp,0,0,7);g.fillStyle='rgba(60,200,110,.8)';g.fill();g.strokeStyle='#fff';g.lineWidth=2;g.stroke();g.lineWidth=.6;g.fillStyle='#fff';g.font='bold 13px system-ui';g.textAlign='center';g.fillText('🌿',A[0],A[1]+4)}}}}
+ if((OPT.title&&mtitle)||realFailed){const tt=realFailed?'Simulated - Connect browser to internet':mtitle;g.font='600 13px system-ui,sans-serif';g.textAlign='center';g.lineJoin='round';g.lineWidth=4;g.strokeStyle='rgba(0,0,0,.7)';g.strokeText(tt,384,41);g.fillStyle=realFailed?'#ff5a48':'#fff';g.fillText(tt,384,41)}
+ g.fillStyle='rgba(255,255,255,.88)';g.beginPath();g.arc(736,72,19,0,7);g.fill();g.fillStyle='#222';g.font='bold 10px system-ui';g.textAlign='center';g.fillText('N',736+sy_*11,72-cy_*sp*11+3);g.beginPath();g.arc(736+sy_*5,72-cy_*sp*5,2.5,0,7);g.fill();
+ g.font='600 11px system-ui,sans-serif';g.textAlign='left';g.fillStyle='rgba(255,255,255,.8)';g.fillText('Drag to spin and tilt · scroll to zoom · heights exaggerated 2.5×',12,494);
+ topoDesc();$('leg').innerHTML='<span>3D terrain from real elevation, coloured with the satellite view. Switch to another layer to edit the road.</span>'}
+
+$('ls').onchange=()=>{if(realOK)return;if(!climate)climate={...heur(40)};climate.urban=$('ls').value==='auto'?autoUrban:+$('ls').value;gen();update()};
+$('un').onclick=()=>{units=units==='metric'?'imperial':'metric';$('un').textContent=units==='metric'?'Units: km · m':'Units: mi · ft';update()};
+$('ps').oninput=()=>{pg=+$('ps').value};
+{const PO=[['setb','setp'],['mapb','mapp'],['infb','infp']].map(([b,p])=>({b:$(b),p:$(p)}));
+ const closeAll=ex=>PO.forEach(o=>{if(o!==ex){o.p.hidden=true;o.b.setAttribute('aria-expanded','false');o.b.classList.remove('on')}});
+ PO.forEach(o=>{o.b.onclick=e=>{e.stopPropagation();closeAll(o);o.p.hidden=!o.p.hidden;o.b.setAttribute('aria-expanded',String(!o.p.hidden));o.b.classList.toggle('on',!o.p.hidden);if(!o.p.hidden){o.p.style.top=(o.b.parentNode.offsetTop+o.b.parentNode.offsetHeight+6)+'px';if(o.p.id==='infp'){updSrcNow();FS.mount()}}}});
+ document.addEventListener('click',e=>{if(!PO.some(o=>o.p.contains(e.target)||o.b.contains(e.target)))closeAll(null)});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAll(null)})}
+$('stb').onclick=()=>$('infb').click();
+
+/* ===== Source registry: every feature lists 2+ sources, each a .gov, .org or Google Earth link. Where a service accepts a place in its URL, the link opens the current place. ===== */
+let FS_last=null;
+const FS=(()=>{
+ const gov=u=>u,GE=(la,lo,alt,d,t)=>`https://earth.google.com/web/@${la},${lo},${alt}a,${d}d,35y,0h,${t}t,0r`;
+ const bb=()=>{if(!geo)return null;const b=bboxOf(geo.lat,geo.lon);return{n:b.n,s:b.s,e:b.e,w:b.w,la:geo.lat,lo:geo.lon}};
+ const f=(v,n=4)=>(+v).toFixed(n);
+ const ear=(alt,d,t)=>()=>{const b=bb();return b?GE(f(b.la),f(b.lo),alt,d,t):'https://earth.google.com/web/'};
+ const GEs=(t,note)=>({n:'Google Earth'+(note?' ('+note+')':''),k:'GE',u:ear(300,45000,t)});
+ const S={
+  nasagibs:{n:'NASA GIBS / Worldview',k:'.gov',u:()=>{const b=bb();return b?`https://worldview.earthdata.nasa.gov/?v=${f(b.lo-.6,3)},${f(b.la-.4,3)},${f(b.lo+.6,3)},${f(b.la+.4,3)}`:'https://worldview.earthdata.nasa.gov/'}},
+  modislc:{n:'NASA / USGS MODIS Land Cover (MCD12Q1)',k:'.gov',u:()=>'https://lpdaac.usgs.gov/products/mcd12q1v061/'},
+  nlcd:{n:'USGS / MRLC National Land Cover Database',k:'.gov',u:()=>'https://www.mrlc.gov/viewer/'},
+  annualnlcd:{n:'USGS Annual NLCD',k:'.gov',u:()=>'https://www.usgs.gov/centers/eros/science/annual-national-land-cover-database'},
+  usgs3dep:{n:'USGS 3D Elevation Program',k:'.gov',u:()=>'https://www.usgs.gov/3d-elevation-program'},
+  srtm:{n:'NASA SRTM (LP DAAC)',k:'.gov',u:()=>'https://lpdaac.usgs.gov/products/srtmgl1v003/'},
+  aster:{n:'NASA ASTER GDEM (LP DAAC)',k:'.gov',u:()=>'https://lpdaac.usgs.gov/products/astgtmv003/'},
+  otd:{n:'OpenTopoData',k:'.org',u:()=>'https://www.opentopodata.org/'},
+  natmap:{n:'USGS National Map viewer',k:'.gov',u:()=>'https://apps.nationalmap.gov/viewer/'},
+  earthex:{n:'USGS EarthExplorer',k:'.gov',u:()=>'https://earthexplorer.usgs.gov/'},
+  topoview:{n:'USGS topoView (historical topo maps)',k:'.gov',u:()=>'https://ngmdb.usgs.gov/topoview/'},
+  gbif:{n:'GBIF occurrences',k:'.org',u:()=>{const b=bb();return b?`https://www.gbif.org/occurrence/search?geometry=POLYGON((${f(b.w)}%20${f(b.s)},${f(b.e)}%20${f(b.s)},${f(b.e)}%20${f(b.n)},${f(b.w)}%20${f(b.n)},${f(b.w)}%20${f(b.s)}))`:'https://www.gbif.org/'}},
+  inat:{n:'iNaturalist observations',k:'.org',u:()=>{const b=bb();return b?`https://www.inaturalist.org/observations?nelat=${f(b.n)}&nelng=${f(b.e)}&swlat=${f(b.s)}&swlng=${f(b.w)}`:'https://www.inaturalist.org/observations'}},
+  iucn:{n:'IUCN Red List',k:'.org',u:()=>'https://www.iucnredlist.org/'},
+  mol:{n:'Map of Life',k:'.org',u:()=>'https://mol.org/'},
+  natserve:{n:'NatureServe Explorer',k:'.org',u:()=>'https://explorer.natureserve.org/'},
+  ecos:{n:'USFWS ECOS (listed species)',k:'.gov',u:()=>'https://ecos.fws.gov/ecp/'},
+  ipac:{n:'USFWS IPaC (species at a location)',k:'.gov',u:()=>'https://ipac.ecosphere.fws.gov/'},
+  nwi:{n:'USFWS National Wetlands Inventory',k:'.gov',u:()=>'https://fwsprimary.wim.usgs.gov/wetlands/apps/wetlands-mapper/'},
+  gap:{n:'USGS Gap Analysis Project (PAD-US, species habitat)',k:'.gov',u:()=>'https://www.usgs.gov/programs/gap-analysis-project'},
+  wildlands:{n:'Wildlands Network',k:'.org',u:()=>'https://wildlandsnetwork.org/'},
+  cwa404:{n:'EPA Clean Water Act Section 404',k:'.gov',u:()=>'https://www.epa.gov/cwa-404'},
+  fedreg:{n:'Federal Register (Nationwide Permits)',k:'.gov',u:()=>'https://www.federalregister.gov/documents/search?conditions%5Bterm%5D=nationwide+permits'},
+  nepa:{n:'EPA National Environmental Policy Act',k:'.gov',u:()=>'https://www.epa.gov/nepa'},
+  aashto:{n:'AASHTO (Green Book)',k:'.org',u:()=>'https://www.transportation.org/'},
+  fhwa:{n:'FHWA (highways.dot.gov)',k:'.gov',u:()=>'https://highways.dot.gov/'},
+  wsdot:{n:'WSDOT',k:'.gov',u:()=>'https://wsdot.wa.gov/'},
+  fdot:{n:'Florida DOT cost per mile',k:'.gov',u:()=>'https://www.fdot.gov/fpo/fpc/reports/costpermile'},
+  arc:{n:'ARC Solutions',k:'.org',u:()=>'https://arc-solutions.org/'},
+  nrcs:{n:'USDA NRCS Web Soil Survey',k:'.gov',u:()=>'https://websoilsurvey.nrcs.usda.gov/'},
+  epastorm:{n:'EPA construction stormwater',k:'.gov',u:()=>'https://www.epa.gov/npdes/stormwater-discharges-construction-activities'},
+  usgswater:{n:'USGS Water Resources',k:'.gov',u:()=>'https://www.usgs.gov/mission-areas/water-resources'},
+  osm:{n:'OpenStreetMap',k:'.org',u:()=>geo?`https://www.openstreetmap.org/#map=10/${f(geo.lat)}/${f(geo.lon)}`:'https://www.openstreetmap.org/'},
+  geonames:{n:'GeoNames',k:'.org',u:()=>'https://www.geonames.org/'},
+  ngs:{n:'NOAA National Geodetic Survey',k:'.gov',u:()=>'https://www.ngs.noaa.gov/'},
+  declin:{n:'NOAA magnetic declination (NCEI)',k:'.gov',u:()=>'https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml'},
+  nist:{n:'NIST metric (SI) units',k:'.gov',u:()=>'https://www.nist.gov/pml/owm/metric-si/si-units'},
+  bipm:{n:'BIPM SI brochure',k:'.org',u:()=>'https://www.bipm.org/en/measurement-units'},
+  usgsscale:{n:'USGS map scale FAQ',k:'.gov',u:()=>'https://www.usgs.gov/faqs/what-map-scale'},
+  usgsdeg:{n:'USGS lat/long distance FAQ',k:'.gov',u:()=>'https://www.usgs.gov/faqs/how-much-distance-does-degree-minute-and-second-cover-your-maps'},
+  summit:{n:'SummitPost',k:'.org',u:()=>'https://www.summitpost.org/'},
+  gelapse:{n:'Google Earth Timelapse',k:'GE',u:()=>geo?`https://earthengine.google.com/timelapse/#v=${f(geo.lat)},${f(geo.lon)},10,latLng&t=0.5`:'https://earthengine.google.com/timelapse/'}
+ };
+ const g=(...k)=>k.map(x=>typeof x==='string'?S[x]:x);
+ const REG={
+  habitat:{t:'Habitat layer',s:g('modislc','nlcd','nasagibs',GEs(0,'compare real land'))},
+  topo:{t:'Topography layer',s:g('usgs3dep','srtm','otd','topoview',GEs(0,'terrain view'))},
+  sat:{t:'Satellite layer',s:g('nasagibs','natmap','earthex',GEs(0,'imagery'))},
+  '3d':{t:'3D terrain layer',s:g('usgs3dep','srtm',GEs(60,'3D tilt'))},
+  time:{t:'Timelapse layer',s:g('modislc','annualnlcd','gelapse')},
+  rich:{t:'Species richness layer',s:g('gbif','inat','mol','gap')},
+  species:{t:'Species range layer',s:g('iucn','mol','natserve','gap','gbif')},
+  o_contours:{t:'Contour lines',s:g('topoview','usgs3dep',GEs(0,'terrain'))},
+  o_grid:{t:'Lat/lon grid',s:g('ngs','usgsdeg')},
+  o_title:{t:'Place name',s:g('osm','geonames')},
+  o_scale:{t:'Scale bar',s:g('usgsscale','ngs')},
+  o_peak:{t:'Peak marker',s:g('natmap','summit',GEs(60,'3D tilt'))},
+  o_smooth:{t:'Smooth habitat edges',s:g('modislc','nlcd')},
+  o_around:{t:'Surrounding area',s:g('nasagibs','natmap',GEs(0))},
+  units:{t:'Units',s:g('nist','bipm')},
+  landsetting:{t:'Land setting',s:g('nlcd','modislc')},
+  search:{t:'Place search, Places and Random',s:g('osm','geonames',GEs(0,'open this place'))},
+  navctl:{t:'Zoom, rotate and north-up',s:g('declin','ngs','usgsscale')},
+  drawtool:{t:'Draw road tool',s:g('fhwa','aashto','natmap')},
+  roadwidth:{t:'Road width and traffic',s:g('aashto','fhwa','fdot')},
+  mitigate:{t:'Wildlife fencing and buffer',s:g('arc','fhwa','epastorm')},
+  crossings:{t:'Add crossing',s:g('arc','fhwa','wsdot')},
+  tunnel:{t:'Add tunnel',s:g('fhwa','fdot','wsdot')},
+  score:{t:'Impact score',s:g('nepa','cwa404','ecos')},
+  permit:{t:'Permit checks',s:g('cwa404','fedreg','nwi','aashto','ecos','wildlands','nrcs')},
+  cost:{t:'Build cost estimate',s:g('fdot','wsdot','arc','fhwa')},
+  elevprofile:{t:'Elevation along road',s:g('usgs3dep','srtm')},
+  speciesimpact:{t:'Species impact',s:g('iucn','gbif','ecos','ipac')},
+  checklist:{t:'Location checklist',s:g('gbif','iucn','natmap','nwi',GEs(0,'look around'))},
+  refresh:{t:'Data refresh schedule',s:g('nasagibs','modislc','otd')}
+ };
+ const link=x=>`<a href="${x.u()}" target="_blank" rel="noopener">${x.n}</a>`;
+ const html=k=>REG[k]?REG[k].s.map(link).join(' · '):'';
+ return{REG,html,link,
+  mount(){const gk=geo?geo.lat+','+geo.lon:'';if(FS_last!==gk||!document.querySelector('[data-fs] details'))document.querySelectorAll('[data-fs]').forEach(e=>{const k=e.dataset.fs,r=REG[k];if(!r)return;e.innerHTML=`<details class="fs"><summary>Sources: ${r.t} (${r.s.length})</summary><div style="margin-top:4px">${html(k)}</div></details>`});FS_last=gk;
+   const v=document.getElementById('fsView');if(v){const k=(typeof layer==='string'&&REG[layer])?layer:'habitat',r=REG[k];v.innerHTML=`<b>Sources for this view (${r.t}):</b> ${html(k)}`}
+   const all=document.getElementById('fsall');if(all&&!all.hidden)all.innerHTML=Object.keys(REG).map(k=>`<details><summary>${REG[k].t} (${REG[k].s.length})</summary><div style="margin:4px 0 4px 8px;font-size:12px">${html(k)}</div></details>`).join('')}};
+})();
+/* data sources panel */
+function updSrcNow(){const e=$('srcNow');if(!e)return;const R=[['Land cover',srcUsed.lc||(realOK?'estimated from imagery colours':'not loaded')],['Elevation',DSN[elevDS]||'not loaded'],['Imagery',srcUsed.img||'not loaded'],['Species records','GBIF (gbif.org)'],['Place search','OpenStreetMap Nominatim']];
+ e.innerHTML=R.map(r=>`<div class="ir"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('');
+ $('srcNote').textContent='Data is downloaded from NASA GIBS, USGS, OpenTopoData, GBIF and OpenStreetMap. Google Earth links open in a new tab for comparison; no data is pulled from it.'}
+$('srcReload').onclick=()=>{if(geo)realLoad(geo.lat,geo.lon)};updSrcNow();
+$('notes').appendChild($('notesSrc').firstChild.nextSibling?$('notesSrc'):$('notesSrc'));$('notesSrc').hidden=false;
+/* map options */
+document.querySelectorAll('[data-o]').forEach(b=>{b.classList.toggle('on',!!OPT[b.dataset.o]);b.onclick=()=>{OPT[b.dataset.o]=OPT[b.dataset.o]?0:1;b.classList.toggle('on',!!OPT[b.dataset.o]);try{localStorage.setItem('gt_opt',JSON.stringify(OPT))}catch(e){}draw()}});
+/* fold-away rows */
+const fold=(btn,box,open,shut)=>{btn.onclick=()=>{box.hidden=!box.hidden;btn.setAttribute('aria-expanded',String(!box.hidden));btn.textContent=box.hidden?shut:open}};
+fold($('moreLb'),$('moreL'),'Less ▴','More ▾');fold($('plb'),$('chips'),'📍 Places ▴','📍 Places ▾');
+document.querySelectorAll('[data-sec]').forEach(b=>b.onclick=()=>{const c=$(b.dataset.sec);c.hidden=!c.hidden;b.classList.toggle('on',!c.hidden);b.setAttribute('aria-expanded',String(!c.hidden))});
+{const openSec=id=>{const c=$(id);if(c.hidden){c.hidden=false;const b=document.querySelector(`[data-sec="${id}"]`);b.classList.add('on');b.setAttribute('aria-expanded','true')}},dflt=/^(Choose Inspect|Draw a road)/,was={};
+ [['info','secChk'],['sps','secSp']].forEach(([i,sc])=>{was[i]=true;new MutationObserver(()=>{const d=dflt.test($(i).textContent.trim());if(was[i]&&!d)openSec(sc);was[i]=d}).observe($(i),{childList:true,subtree:true,characterData:true})})}
+$('tyr').oninput=()=>{tyear=+$('tyr').value;rq()};
+$('tpl').onclick=()=>{if(tplay){clearInterval(tplay);tplay=null;$('tpl').textContent='▶ Play';return}if(tyear>=tyMax())tyear=tyMin();$('tpl').textContent='⏸ Pause';tplay=setInterval(()=>{if(tyear>=tyMax()){clearInterval(tplay);tplay=null;$('tpl').textContent='▶ Play';return}tyear++;rq()},realOK?1100:300)};
+/* ===== Scheduled refresh: the landscape renews every 2 days, on a fixed schedule shared by everyone ===== */
+const EPOCH=Date.UTC(2026,0,1,1,0,0),PERIOD=2*86400000,cyc=()=>Math.floor((Date.now()-EPOCH)/PERIOD);
+const placeSeed=(la,lo)=>(Math.abs(Math.round(la*100)*7919+Math.round(lo*100)*104729)+cyc()*131)%900+1,
+ baseSeed=()=>geo?placeSeed(geo.lat,geo.lon):(7+cyc()*131)%900+1;
+let curCyc=cyc();seedN=baseSeed();
+const two=n=>String(n).padStart(2,'0'),fdt=t=>new Date(t).toLocaleString('en-US',{timeZone:'Etc/GMT+8',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})+' PST';
+function updCmp(){try{FS.mount()}catch(e){}const e=$('geoLinks');if(!e)return;if(!geo){e.innerHTML='Search a place above to get links for it.';return}
+ const la=geo.lat.toFixed(4),lo=geo.lon.toFixed(4),L=(u,t)=>`<a href="${u}" target="_blank" rel="noopener">${t}</a>`;
+ e.innerHTML=[L(`https://worldview.earthdata.nasa.gov/?v=${(+lo-.6).toFixed(3)},${(+la-.4).toFixed(3)},${(+lo+.6).toFixed(3)},${(+la+.4).toFixed(3)}`,'NASA Worldview (real imagery)'),L(`https://earth.google.com/web/@${la},${lo},300a,45000d,35y,0h,0t,0r`,'Google Earth'),L('https://earthexplorer.usgs.gov/','USGS EarthExplorer'),L('https://mol.org/','Map of Life (species ranges)'),L('https://www.inaturalist.org/observations','iNaturalist'),L(`https://www.openstreetmap.org/#map=10/${la}/${lo}`,'OpenStreetMap')].join(' · ')}
+function tickUpd(){const n=cyc();
+ if(n!==curCyc){curCyc=n;if(realOK&&geo){realLoad(geo.lat,geo.lon)}else{seedN=baseSeed();gen();update()}$('hint').textContent='The map just refreshed on its 2-day schedule.'}
+ const last=EPOCH+n*PERIOD,next=last+PERIOD,ms=Math.max(0,next-Date.now()),d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5),m=Math.floor(ms%36e5/6e4),sec=Math.floor(ms%6e4/1e3);
+ $('updLast').textContent=realOK&&lastReal?fdt(lastReal.getTime())+' (real data downloaded)':fdt(last);$('updNext').innerHTML='<b>'+d+'d '+two(h)+':'+two(m)+':'+two(sec)+'</b> · '+fdt(next)}
+setInterval(tickUpd,1000);
+$('hint').textContent=hints.inspect;gen();update();tickUpd();updCmp();goTo('Santa Cruz Mountains');
+</script></body></html>
